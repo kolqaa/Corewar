@@ -27,6 +27,7 @@ typedef struct s_data
 	int     comment;
 	char    **array;
 	m_lst *lst;
+
 }              t_data;
 
 #endif
