@@ -96,7 +96,7 @@ void copy_file(char *line, t_data *data)
 	j = 0;
 	while (line[index])
 		data->array[g_i][j++] = line[index++];
-	data->array[g_i][j + 1] = '\0';
+	data->array[g_i][j] = '\0';
 	g_i++;
 }
 
@@ -153,56 +153,56 @@ int is_lable_char(char lbl)
 			return (1);
 		i++;
 	}
-
 	return (0);
 }
-int no_cmd_before(char *line)
-{
 
+int confirm_lbl(char *line, t_data * data, int flag)
+{
+	int i = 0;
+	if (flag)
+	{
+		while (line[i] && line[i] != SEPARATOR_CHAR)
+		{
+			if (is_lable_char(line[i]))
+				i++;
+			else
+				return (0);
+		}
+		printf("\n");
+		return (1);
+	}
+	while (line[i] != ' ' && line[i] != '\t' && line[i] != '\n' && line[i] != LABEL_CHAR)
+	{
+		if (is_lable_char(line[i]))
+			i++;
+		else
+			return (0);
+	}
 }
+
 int check_lable(char *line, t_data *data)
 {
 	int i;
-	int count;
 
 	i = 0;
-	count = 0;
+	if (line[0] == LABEL_CHAR)
+		return (0);
 	while (line[i])
 	{
-		if (line[i] == LABEL_CHAR)
-			count++;
-		if (count > 2)
+		if ((line[i] == LABEL_CHAR) && (line[i - 1] == DIRECT_CHAR || line[i - 1] == ',' || line[i - 1] == ' '))
 		{
-			printf("TO MUCH LABAL_CHAR\n");
-			return (0);
+			if (!confirm_lbl(&line[i + 1], data, 1))
+				return (0);
+		}
+		if (line[i] == LABEL_CHAR && is_lable_char(line[i - 1]))
+		{
+			if (!confirm_lbl(line, data, 0))
+			printf("it first lablen\n");
 		}
 		i++;
-	}
-	if (count == 1)
-	{
-		i = 0;
-		while (line[i])
-		{
-			if ((line[i] == LABEL_CHAR) && (line[i - 1] == DIRECT_CHAR || line[i - 1] == ',' || line[i - 1] == ' '))
-			{
-				printf("inside lableee\n");
-				take_lable(&line[i - 1], data);
-				break ;
-			}
-			if (line[i] == LABEL_CHAR && is_lable_char(line[i - 1]))
-			{
-				printf("it first lablen\n");
-				break;
-			}
-			i++;
-		}
-	}
-	if (count == 2)
-	{
-		printf("IT IS TWO ARG\n");
+
 	}
 	return (1);
-
 }
 
 int check_cmd_and_args(char *line, t_data *data)

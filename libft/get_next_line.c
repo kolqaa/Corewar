@@ -75,18 +75,6 @@ int		help(t_mylist *head, int fd, char *temp, char **line)
 		ft_strdel(&(head[fd].buff));
 		return (1);
 	}
-	if (*line[0] == 0)
-		return (0);
-	return (1);
-}
-
-int		free_buff(t_mylist *head, int fd)
-{
-	if (head[fd].buff[0] == '\0')
-	{
-		ft_strdel(&(head[fd].buff));
-		return (0);
-	}
 	return (1);
 }
 
@@ -101,8 +89,6 @@ int		get_next_line(int const fd, char **line)
 		return (0);
 	if (head[fd].buff != NULL)
 	{
-		if (!free_buff(head, fd))
-			return (0);
 		if ((check_buff(head[fd].buff, line)) == 1)
 			return (1);
 	}
