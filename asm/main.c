@@ -22,18 +22,21 @@ int check_byte(int read_byte, char *name)
 	return (1);
 }
 
-int check_comment(int k, char *line, t_data *data)
+int check_comment(int k, char *line, t_data *data, int i)
 {
 	static int quotes = 0;
 	static int read_byte = 0;
-	int i = 0;
 
-	while (line[i])
+	while (line[++i])
 	{
 		if (line[i] == '\"')
 			quotes++;
 		read_byte++;
-		i++;
+		if (quotes > 2)
+		{
+			printf(LEXICAL_ERROR, k, i);
+			return (0);
+		}
 	}
 	if (!check_byte(read_byte, COMMENT_CMD_STRING))
 		return (0);
@@ -43,23 +46,25 @@ int check_comment(int k, char *line, t_data *data)
 		return (1);
 	}
 	else
-		check_comment(k + 1, data->array[k + 1], data);
+		check_comment(k + 1, data->array[k + 1], data, -1);
 	return (1);
 }
 
-int check_name(int k, char *line, t_data *data)
+int check_name(int k, char *line, t_data *data, int i)
 {
 	static int quotes = 0;
 	static int read_byte = 0;
-	int i;
 
-	i = 0;
-	while (line[i])
+	while (line[++i])
 	{
 		if (line[i] == '\"')
 			quotes++;
 		read_byte++;
-		i++;
+		if (quotes > 2)
+		{
+			printf(LEXICAL_ERROR, k, i);
+				return (0);
+		}
 	}
 	if (!check_byte(read_byte, NAME_CMD_STRING))
 		return (0);
@@ -69,7 +74,7 @@ int check_name(int k, char *line, t_data *data)
 		return (1);
 	}
 	else
-		check_name(k + 1, data->array[k + 1], data);
+		check_name(k + 1, data->array[k + 1], data, -1);
 	return (1);
 }
 
@@ -91,7 +96,7 @@ void copy_file(char *line, t_data *data)
 	j = 0;
 	while (line[index])
 		data->array[g_i][j++] = line[index++];
-	data->array[g_i][j] = '\0';
+	data->array[g_i][j + 1] = '\0';
 	g_i++;
 }
 
@@ -112,7 +117,8 @@ void    copy_file_to_array(t_data *data, int fd)
 		copy_file(line, data);
 		free(line);
 	}
-	data->array[g_num_line] = 0;
+	data->array[g_i] = 0;
+	g_i = 0;
 }
 
 void    write_line(m_lst **lst, char *line)
@@ -136,15 +142,84 @@ void    write_line(m_lst **lst, char *line)
 
 }
 
-int parse_line(char *line, t_data *data)
+int is_lable_char(char lbl)
 {
 	int i;
 
 	i = 0;
-	if (is_lbl(line))
-		return (0);
-	if (is_cmd(line))
-		return (0);
+	while (LABEL_CHARS[i])
+	{
+		if (lbl == LABEL_CHARS[i])
+			return (1);
+		i++;
+	}
+
+	return (0);
+}
+int no_cmd_before(char *line)
+{
+
+}
+int check_lable(char *line, t_data *data)
+{
+	int i;
+	int count;
+
+	i = 0;
+	count = 0;
+	while (line[i])
+	{
+		if (line[i] == LABEL_CHAR)
+			count++;
+		if (count > 2)
+		{
+			printf("TO MUCH LABAL_CHAR\n");
+			return (0);
+		}
+		i++;
+	}
+	if (count == 1)
+	{
+		i = 0;
+		while (line[i])
+		{
+			if ((line[i] == LABEL_CHAR) && (line[i - 1] == DIRECT_CHAR || line[i - 1] == ',' || line[i - 1] == ' '))
+			{
+				printf("inside lableee\n");
+				take_lable(&line[i - 1], data);
+				break ;
+			}
+			if (line[i] == LABEL_CHAR && is_lable_char(line[i - 1]))
+			{
+				printf("it first lablen\n");
+				break;
+			}
+			i++;
+		}
+	}
+	if (count == 2)
+	{
+		printf("IT IS TWO ARG\n");
+	}
+	return (1);
+
+}
+
+int check_cmd_and_args(char *line, t_data *data)
+{
+
+	return 1;
+}
+
+int parse_line(char *line, t_data *data)
+{
+	if (data->name && data->comment)
+		data->itfirst = 0;
+	if (!check_lable(line, data))
+			return (0);
+	if (!check_cmd_and_args(line, data))
+			return (0);
+	return (1);
 }
 
 void    parse_file(t_data *data)
@@ -153,7 +228,6 @@ void    parse_file(t_data *data)
 	m_lst *head;
 
 	i = 0;
-	int j = 0;
 	while (data->array[i])
 	{
 		if (!ft_strcmp("", data->array[i]))
@@ -163,13 +237,13 @@ void    parse_file(t_data *data)
 		}
 		//write_line(&(data->lst), data->array[i]);
 		if (ft_strstr(data->array[i], NAME_CMD_STRING) && data->itfirst)
-			if (!check_name(i, data->array[i], data))
+			if (!check_name(i, data->array[i], data, -1))
 				return ;
 		if (ft_strstr(data->array[i], COMMENT_CMD_STRING) && data->itfirst)
-			if (!check_comment(i, data->array[i], data))
+			if (!check_comment(i, data->array[i], data, -1))
 				return ;
 		if (!parse_line(data->array[i], data))
-			return ;
+			 return ;
 		i++;
 	}
 //	head = data->lst;
@@ -187,13 +261,11 @@ int   check_prog_name(char *prog_name)
 {
 	int len;
 
-	len = ft_strlen(prog_name) - 1;
+	len = (int)ft_strlen(prog_name) - 1;
 	while (prog_name[len] && len > 0)
 	{
-		if (prog_name[len] == 's' && prog_name[len - 1] == '.') {
-			printf("valid prog\n");
+		if (prog_name[len] == 's' && prog_name[len - 1] == '.' && len >= 2)
 			return (1);
-		}
 		len--;
 	}
 	printf(PROG_NAME_ERROR);
@@ -232,6 +304,8 @@ int main(int argc , char **argv)
 	data->itfirst = 1;
 	data->name = 0;
 	data->comment = 0;
+	data->lable = 0;
+	data->instruction = 0;
 	data->lst = NULL;
 	if (argc != 2)
 	{
@@ -245,12 +319,14 @@ int main(int argc , char **argv)
 	}
 	if (!validate(fd, data, argv[1]))
 		return (0);
-	int i  = 0;
-	while (data->array[i])
-	{
-		printf("{%s}\n", data->array[i]);
-		i++;
-	}
+//	int i  = 0;
+//	while (data->array[i])
+//	{
+//		if (!ft_strcmp("", data->array[i]))
+//			printf("WOW");
+//		printf("{%s}\n", data->array[i]);
+//		i++;
+//	}
 	return (0);
 
 }
