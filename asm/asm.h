@@ -8,6 +8,10 @@
 #define LEXICAL_ERROR "Lexical error at [%d : %d]\n"
 #define PROG_NAME_ERROR "Usage: <sourcefile.s> other extension not supported\n"
 #define UNEXPECTED_INPUT "Syntax error - unexpected end of input (Perhaps you forgot to end with a newline ?)\n"
+#define COMMAND_LABLE 1
+#define FIRST_LABLE 0
+#define RETURN1 return (1);
+#define RETURN0 return (0)
 
 int g_num_line = 0;
 int g_start_mem_arr_size = 5;
@@ -25,14 +29,16 @@ typedef struct       lst
 typedef struct s_data
 {
 	int lable;
+	char *lable_name;
 	int instruction;
-	int itfirst;
+	int cmd;
 	int name;
 	int comment;
 	char    **array;
 	m_lst *lst;
 
 }              t_data;
+
 
 #endif
 

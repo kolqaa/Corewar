@@ -156,48 +156,102 @@ int is_lable_char(char lbl)
 	return (0);
 }
 
-int confirm_lbl(char *line, t_data * data, int flag)
+int confirm_lbl(char *line, t_data * data, int cmd_lbl)
 {
 	int i = 0;
-	if (flag)
+	//printf("STR WHAT I TAKE:%s\n", line);
+	if (cmd_lbl)
 	{
-		while (line[i] && line[i] != SEPARATOR_CHAR)
+		printf("CMD:");
+		while (line[i] && line[i] != SEPARATOR_CHAR && line[i] != ' ' && line[i] != '\n')
 		{
+			printf("%c", line[i]);
 			if (is_lable_char(line[i]))
 				i++;
-			else
+			else {
+				printf("\'%c\' its not lable char man!!!! WTF BITCH\n", line[i]);
 				return (0);
+			}
 		}
 		printf("\n");
+		data->lable = 1;
+		data->lable_name = ft_strncpy(data->lable_name, line, (size_t)i);
+		printf("LABLE_NAME1:%s\n", data->lable_name);
+		printf("ITS NORM CMD LBL\n");
 		return (1);
 	}
+	printf("FST:");
 	while (line[i] != ' ' && line[i] != '\t' && line[i] != '\n' && line[i] != LABEL_CHAR)
 	{
+		printf("%c", line[i]);
 		if (is_lable_char(line[i]))
 			i++;
-		else
+		else {
+			printf("\'%c\' its not lable char man!!!! WTF BITCH\n", line[i]);
 			return (0);
+		}
 	}
+	printf("\n");
+	data->lable = 1;
+	printf("ITS NORM FIRST LABLE\n");
+	return (1);
 }
 
-int check_lable(char *line, t_data *data)
+int exist_lable(char *lable_name, t_data *data, int line_nbr)
+{
+	int i;
+	int find;
+
+	i = 0;
+	find = 0;
+	while (data->array[i])
+	{
+		if (i == line_nbr) {
+			printf("MY LINE IN EXIST: %s  LABLE NAME: %s\n", data->array[line_nbr], lable_name);
+			i++;
+			continue ;
+		}
+		if (ft_strstr(data->array[i], lable_name))
+			find++;
+		i++;
+	}
+	if (!ft_strncmp(lable_name, data->array[line_nbr], ft_strlen(lable_name)))
+	{
+		printf("%s find in line_nbr\n", lable_name);
+		find++;
+	}
+	if (find) {
+		printf("LABLE {%s} IS EXIST\n", lable_name);
+		return (1);
+	}
+	printf("LABLE {%s} IS NOT EXITS\n", lable_name);
+	return (0);
+}
+
+int check_lable(char *line, t_data *data, int line_nbr)
 {
 	int i;
 
 	i = 0;
 	if (line[0] == LABEL_CHAR)
+	{
+		printf("LABLE CHAR cant be at the begginig of string, whuzup?\n");
 		return (0);
+	}
 	while (line[i])
 	{
 		if ((line[i] == LABEL_CHAR) && (line[i - 1] == DIRECT_CHAR || line[i - 1] == ',' || line[i - 1] == ' '))
 		{
-			if (!confirm_lbl(&line[i + 1], data, 1))
+			if (!confirm_lbl(&line[i + 1], data, COMMAND_LABLE))
+				return (0);
+			printf("BEFORE EXIST {%s}\n", data->lable_name);
+			if (!exist_lable(data->lable_name, data, line_nbr))
 				return (0);
 		}
 		if (line[i] == LABEL_CHAR && is_lable_char(line[i - 1]))
 		{
-			if (!confirm_lbl(line, data, 0))
-			printf("it first lablen\n");
+			if (!confirm_lbl(line, data, FIRST_LABLE))
+				return (0);
 		}
 		i++;
 
@@ -211,18 +265,29 @@ int check_cmd_and_args(char *line, t_data *data)
 	return 1;
 }
 
-int parse_line(char *line, t_data *data)
+int parse_line(char *line, t_data *data, int line_nbr)
 {
-	if (data->name && data->comment)
-		data->itfirst = 0;
-	if (!check_lable(line, data))
+	if (check_lable(line, data, line_nbr))
+	{
+		if (data->lable && !data->name && !data->comment)
+		{
+			printf("name and comment should be first than lable read subject WTF!!!??\n");
 			return (0);
-	if (!check_cmd_and_args(line, data))
+		}
+		return (1);
+	}
+	if (check_cmd_and_args(line, data))
+	{
+		if (data->cmd && !data->name && !data->comment) {
+			printf("name and commnent should be first than lable read subject WTF!!!??\n");
 			return (0);
+		}
+		return (1);
+	}
 	return (1);
 }
 
-void    parse_file(t_data *data)
+int   parse_file(t_data *data)
 {
 	int i;
 	m_lst *head;
@@ -235,15 +300,15 @@ void    parse_file(t_data *data)
 			i++;
 			continue ;
 		}
-		//write_line(&(data->lst), data->array[i]);
-		if (ft_strstr(data->array[i], NAME_CMD_STRING) && data->itfirst)
+		if (ft_strstr(data->array[i], NAME_CMD_STRING))
 			if (!check_name(i, data->array[i], data, -1))
-				return ;
-		if (ft_strstr(data->array[i], COMMENT_CMD_STRING) && data->itfirst)
+				return 0;
+		if (ft_strstr(data->array[i], COMMENT_CMD_STRING))
 			if (!check_comment(i, data->array[i], data, -1))
-				return ;
-		if (!parse_line(data->array[i], data))
-			 return ;
+				return 0;
+		//write_line(&(data->lst), data->array[i]);
+		if (!parse_line(data->array[i], data, i))
+			 return 0;
 		i++;
 	}
 //	head = data->lst;
@@ -252,9 +317,7 @@ void    parse_file(t_data *data)
 //		printf("LST {%s}\n", head->command);
 //		head = head->next;
 //	}
-	printf("before sellp\n");
-	sleep(222);
-
+	return 1;
 }
 
 int   check_prog_name(char *prog_name)
@@ -280,7 +343,8 @@ int   validate(int fd, t_data *data, char *prog_name)
 		return (0);
 	make_array(data);
 	copy_file_to_array(data, fd);
-	parse_file(data);
+	if (!parse_file(data))
+		return 0;
 	//if (is_valid_file(data))
 	//	return (1);
 //	return (0);
@@ -301,11 +365,11 @@ int main(int argc , char **argv)
 	t_data *data;
 
 	data = (t_data*)malloc(sizeof(*data));
-	data->itfirst = 1;
 	data->name = 0;
 	data->comment = 0;
 	data->lable = 0;
 	data->instruction = 0;
+	data->cmd = 0;
 	data->lst = NULL;
 	if (argc != 2)
 	{
