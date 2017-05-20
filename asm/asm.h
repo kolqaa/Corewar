@@ -29,7 +29,7 @@ typedef struct       lst
 typedef struct s_data
 {
 	int lable;
-	char *lable_name;
+	char *cmd_lbl_name;
 	int instruction;
 	int cmd;
 	int name;

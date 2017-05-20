@@ -3,6 +3,20 @@
 #include "asm.h"
 #include "../op.h"
 
+char		*my_strncpy(char *dst, const char *src, size_t len)
+{
+	size_t	i;
+
+	i = 0;
+	dst = (char *)malloc(sizeof(char) * (len + 1));
+	while (i < len && src[i] != '\0')
+	{
+		dst[i] = src[i];
+		i++;
+	}
+	dst[i] = '\0';
+	return (dst);
+}
 
 int check_byte(int read_byte, char *name)
 {
@@ -159,24 +173,25 @@ int is_lable_char(char lbl)
 int confirm_lbl(char *line, t_data * data, int cmd_lbl)
 {
 	int i = 0;
-	//printf("STR WHAT I TAKE:%s\n", line);
 	if (cmd_lbl)
 	{
 		printf("CMD:");
-		while (line[i] && line[i] != SEPARATOR_CHAR && line[i] != ' ' && line[i] != '\n')
+		while (line[i] && line[i] != SEPARATOR_CHAR && line[i] != '\t' && line[i] != ' ')
 		{
 			printf("%c", line[i]);
 			if (is_lable_char(line[i]))
 				i++;
-			else {
-				printf("\'%c\' its not lable char man!!!! WTF BITCH\n", line[i]);
+			else
+			{
+				printf("in\n");
+				printf("{%c} its not lable char man!!!! WTF BITCH\n", line[i]);
 				return (0);
 			}
 		}
 		printf("\n");
 		data->lable = 1;
-		data->lable_name = ft_strncpy(data->lable_name, line, (size_t)i);
-		printf("LABLE_NAME1:%s\n", data->lable_name);
+		data->cmd_lbl_name = my_strncpy(data->cmd_lbl_name, line, (size_t)i);
+		printf("LABLE_IN_CMD:%s\n", data->cmd_lbl_name);
 		printf("ITS NORM CMD LBL\n");
 		return (1);
 	}
@@ -186,8 +201,9 @@ int confirm_lbl(char *line, t_data * data, int cmd_lbl)
 		printf("%c", line[i]);
 		if (is_lable_char(line[i]))
 			i++;
-		else {
-			printf("\'%c\' its not lable char man!!!! WTF BITCH\n", line[i]);
+		else
+		{
+			printf("{%c} its not lable char man!!!! WTF BITCH\n", line[i]);
 			return (0);
 		}
 	}
@@ -204,10 +220,16 @@ int exist_lable(char *lable_name, t_data *data, int line_nbr)
 
 	i = 0;
 	find = 0;
+	if (!ft_strncmp(lable_name, data->array[line_nbr], ft_strlen(lable_name)))
+	{
+		printf("%s find in line_nbr\n", lable_name);
+		find++;
+	}
 	while (data->array[i])
 	{
-		if (i == line_nbr) {
-			printf("MY LINE IN EXIST: %s  LABLE NAME: %s\n", data->array[line_nbr], lable_name);
+		if (i == line_nbr)
+		{
+			printf("MY LINE IN EXIST: {%s LABLE NAME: %s}\n", data->array[line_nbr], lable_name);
 			i++;
 			continue ;
 		}
@@ -215,16 +237,14 @@ int exist_lable(char *lable_name, t_data *data, int line_nbr)
 			find++;
 		i++;
 	}
-	if (!ft_strncmp(lable_name, data->array[line_nbr], ft_strlen(lable_name)))
+	if (find)
 	{
-		printf("%s find in line_nbr\n", lable_name);
-		find++;
-	}
-	if (find) {
 		printf("LABLE {%s} IS EXIST\n", lable_name);
+		free(data->cmd_lbl_name);
 		return (1);
 	}
 	printf("LABLE {%s} IS NOT EXITS\n", lable_name);
+	free(data->cmd_lbl_name);
 	return (0);
 }
 
@@ -244,8 +264,7 @@ int check_lable(char *line, t_data *data, int line_nbr)
 		{
 			if (!confirm_lbl(&line[i + 1], data, COMMAND_LABLE))
 				return (0);
-			printf("BEFORE EXIST {%s}\n", data->lable_name);
-			if (!exist_lable(data->lable_name, data, line_nbr))
+			if (!exist_lable(data->cmd_lbl_name, data, line_nbr))
 				return (0);
 		}
 		if (line[i] == LABEL_CHAR && is_lable_char(line[i - 1]))
@@ -254,14 +273,19 @@ int check_lable(char *line, t_data *data, int line_nbr)
 				return (0);
 		}
 		i++;
-
 	}
 	return (1);
 }
 
-int check_cmd_and_args(char *line, t_data *data)
+int check_cmd_and_args(char *line, t_data *data, int line_nbr)
 {
+	int i;
 
+	i = 0;
+	while (line[i])
+	{
+
+	}
 	return 1;
 }
 
@@ -276,9 +300,10 @@ int parse_line(char *line, t_data *data, int line_nbr)
 		}
 		return (1);
 	}
-	if (check_cmd_and_args(line, data))
+	if (check_cmd_and_args(line, data, line_nbr))
 	{
-		if (data->cmd && !data->name && !data->comment) {
+		if (data->cmd && !data->name && !data->comment)
+		{
 			printf("name and commnent should be first than lable read subject WTF!!!??\n");
 			return (0);
 		}
@@ -290,15 +315,14 @@ int parse_line(char *line, t_data *data, int line_nbr)
 int   parse_file(t_data *data)
 {
 	int i;
-	m_lst *head;
 
 	i = 0;
 	while (data->array[i])
 	{
-		if (!ft_strcmp("", data->array[i]))
+		if ((data->array[i][0] == COMMENT_CHAR) || (!ft_strcmp("", data->array[i])))
 		{
 			i++;
-			continue ;
+			continue;
 		}
 		if (ft_strstr(data->array[i], NAME_CMD_STRING))
 			if (!check_name(i, data->array[i], data, -1))
@@ -306,11 +330,11 @@ int   parse_file(t_data *data)
 		if (ft_strstr(data->array[i], COMMENT_CMD_STRING))
 			if (!check_comment(i, data->array[i], data, -1))
 				return 0;
-		//write_line(&(data->lst), data->array[i]);
 		if (!parse_line(data->array[i], data, i))
 			 return 0;
 		i++;
 	}
+		//write_line(&(data->lst), data->array[i]);
 //	head = data->lst;
 //	while (head != NULL)
 //	{
@@ -318,6 +342,21 @@ int   parse_file(t_data *data)
 //		head = head->next;
 //	}
 	return 1;
+}
+
+int add_valid(t_data *data)
+{
+	if ((data->name && !data->comment) || (!data->name && data->comment))
+	{
+		printf("Name and comment is necessary in champion\n");
+		return (0);
+	}
+	if (!data->lable && !data->cmd && data->name && data->comment)
+	{
+		printf("It cant be null file after name and comment\n");
+		return (0);
+	}
+	return (1);
 }
 
 int   check_prog_name(char *prog_name)
@@ -336,7 +375,6 @@ int   check_prog_name(char *prog_name)
 
 }
 
-
 int   validate(int fd, t_data *data, char *prog_name)
 {
 	if (!check_prog_name(prog_name))
@@ -344,7 +382,9 @@ int   validate(int fd, t_data *data, char *prog_name)
 	make_array(data);
 	copy_file_to_array(data, fd);
 	if (!parse_file(data))
-		return 0;
+		return (0);
+	if (!add_valid(data))
+		return (0);
 	//if (is_valid_file(data))
 	//	return (1);
 //	return (0);
@@ -355,6 +395,7 @@ int   validate(int fd, t_data *data, char *prog_name)
 //			if (!check_comment(fd, line, data))
 //				return (0);
 	printf("end while start printing...\n");
+	sleep(222);
 	return (1);
 
 }
