@@ -31,6 +31,7 @@ typedef struct s_data
 	int lable;
 	char *cmd_lbl_name;
 	int instruction;
+	char *instruct_name[17];
 	int cmd;
 	int name;
 	int comment;

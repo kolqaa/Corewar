@@ -3,18 +3,19 @@
 #include "asm.h"
 #include "../op.h"
 
-char		*my_strncpy(char *dst, const char *src, size_t len)
+char		*ft_copyLable(char *dst, const char *src, size_t len)
 {
 	size_t	i;
 
 	i = 0;
-	dst = (char *)malloc(sizeof(char) * (len + 1));
+	dst = (char *)malloc(sizeof(char) * (len + 2));
 	while (i < len && src[i] != '\0')
 	{
 		dst[i] = src[i];
 		i++;
 	}
-	dst[i] = '\0';
+	dst[i] = ':';
+	dst[i + 1] = '\0';
 	return (dst);
 }
 
@@ -121,7 +122,7 @@ void    make_array(t_data *data)
 	data->array[g_start_mem_arr_size] = 0;
 }
 
-void    copy_file_to_array(t_data *data, int fd)
+int    copy_file_to_array(t_data *data, int fd)
 {
 	char *line;
 
@@ -131,8 +132,14 @@ void    copy_file_to_array(t_data *data, int fd)
 		copy_file(line, data);
 		free(line);
 	}
-	data->array[g_i] = 0;
-	g_i = 0;
+	if (!ft_strcmp("\t", data->array[g_num_line - 1]))
+	{
+		data->array[g_i - 1] = 0;
+		g_i = 0;
+		return (1);
+	}
+	printf(UNEXPECTED_INPUT);
+	return (0);
 }
 
 void    write_line(m_lst **lst, char *line)
@@ -175,8 +182,10 @@ int confirm_lbl(char *line, t_data * data, int cmd_lbl)
 	int i = 0;
 	if (cmd_lbl)
 	{
+		while (line[i] == ' ' && line[i] == '\t')
+			i++;
 		printf("CMD:");
-		while (line[i] && line[i] != SEPARATOR_CHAR && line[i] != '\t' && line[i] != ' ')
+		while (line[i] && line[i] != SEPARATOR_CHAR && line[i] != '\t' && line[i] != ' ' && line[i] != COMMENT_CHAR)
 		{
 			printf("%c", line[i]);
 			if (is_lable_char(line[i]))
@@ -190,13 +199,13 @@ int confirm_lbl(char *line, t_data * data, int cmd_lbl)
 		}
 		printf("\n");
 		data->lable = 1;
-		data->cmd_lbl_name = my_strncpy(data->cmd_lbl_name, line, (size_t)i);
+		data->cmd_lbl_name = ft_copyLable(data->cmd_lbl_name, line, (size_t) i);
 		printf("LABLE_IN_CMD:%s\n", data->cmd_lbl_name);
 		printf("ITS NORM CMD LBL\n");
 		return (1);
 	}
 	printf("FST:");
-	while (line[i] != ' ' && line[i] != '\t' && line[i] != '\n' && line[i] != LABEL_CHAR)
+	while (line[i] != ' ' && line[i] != '\t' && line[i] != '\n' && line[i] != LABEL_CHAR && line[i] != COMMENT_CHAR)
 	{
 		printf("%c", line[i]);
 		if (is_lable_char(line[i]))
@@ -221,20 +230,21 @@ int exist_lable(char *lable_name, t_data *data, int line_nbr)
 	i = 0;
 	find = 0;
 	if (!ft_strncmp(lable_name, data->array[line_nbr], ft_strlen(lable_name)))
-	{
-		printf("%s find in line_nbr\n", lable_name);
 		find++;
-	}
 	while (data->array[i])
 	{
-		if (i == line_nbr)
+		if ((i == line_nbr) || (data->array[i][0] == COMMENT_CHAR))//segmentation
 		{
-			printf("MY LINE IN EXIST: {%s LABLE NAME: %s}\n", data->array[line_nbr], lable_name);
+			//printf("MY LINE IN EXIST: {%s LABLE NAME: %s}\n", data->array[line_nbr], lable_name);
 			i++;
 			continue ;
 		}
-		if (ft_strstr(data->array[i], lable_name))
+		if (!ft_strncmp(lable_name, data->array[i], ft_strlen(lable_name)))
+		{
 			find++;
+			if(data->array[i][ft_strlen(lable_name)] != LABEL_CHAR) // если не добавить : к концу лейбла
+				find--;
+		}
 		i++;
 	}
 	if (find)
@@ -260,6 +270,8 @@ int check_lable(char *line, t_data *data, int line_nbr)
 	}
 	while (line[i])
 	{
+		if (line[i] == COMMENT_CHAR)
+			break;
 		if ((line[i] == LABEL_CHAR) && (line[i - 1] == DIRECT_CHAR || line[i - 1] == ',' || line[i - 1] == ' '))
 		{
 			if (!confirm_lbl(&line[i + 1], data, COMMAND_LABLE))
@@ -277,19 +289,30 @@ int check_lable(char *line, t_data *data, int line_nbr)
 	return (1);
 }
 
+int   check_cmd(char *line, t_data *data, int line_nbr)
+{
+	printf("instruction LINE = %s\n", line);
+	return 1;
+}
+
+
 int check_cmd_and_args(char *line, t_data *data, int line_nbr)
 {
 	int i;
 
 	i = 0;
-	while (line[i])
+	while (data->instruct_name[i])
 	{
-
+		char *instruction = ft_strstr(line, data->instruct_name[i]);
+		if (instruction)
+			if (!check_cmd(instruction, data, line_nbr))
+				return (0);
+		i++;
 	}
 	return 1;
 }
 
-int parse_line(char *line, t_data *data, int line_nbr)
+int parse_lbl(char *line, t_data *data, int line_nbr)
 {
 	if (check_lable(line, data, line_nbr))
 	{
@@ -300,6 +323,11 @@ int parse_line(char *line, t_data *data, int line_nbr)
 		}
 		return (1);
 	}
+	return (1);
+}
+
+int parse_cmd(char *line, t_data *data, int line_nbr)
+{
 	if (check_cmd_and_args(line, data, line_nbr))
 	{
 		if (data->cmd && !data->name && !data->comment)
@@ -330,8 +358,10 @@ int   parse_file(t_data *data)
 		if (ft_strstr(data->array[i], COMMENT_CMD_STRING))
 			if (!check_comment(i, data->array[i], data, -1))
 				return 0;
-		if (!parse_line(data->array[i], data, i))
+		if (!parse_lbl(data->array[i], data, i))
 			 return 0;
+		if (!parse_cmd(data->array[i], data, i))
+				return (0);
 		i++;
 	}
 		//write_line(&(data->lst), data->array[i]);
@@ -344,7 +374,7 @@ int   parse_file(t_data *data)
 	return 1;
 }
 
-int add_valid(t_data *data)
+int bonus_validate(t_data *data)
 {
 	if ((data->name && !data->comment) || (!data->name && data->comment))
 	{
@@ -380,10 +410,11 @@ int   validate(int fd, t_data *data, char *prog_name)
 	if (!check_prog_name(prog_name))
 		return (0);
 	make_array(data);
-	copy_file_to_array(data, fd);
+	if (!copy_file_to_array(data, fd))
+		return (0);
 	if (!parse_file(data))
 		return (0);
-	if (!add_valid(data))
+	if (!bonus_validate(data))
 		return (0);
 	//if (is_valid_file(data))
 	//	return (1);
@@ -400,7 +431,27 @@ int   validate(int fd, t_data *data, char *prog_name)
 
 }
 
-int main(int argc , char **argv)
+void    init_mas(t_data *data)
+{
+	data->instruct_name[0] = "live";
+	data->instruct_name[1] = "ld";
+	data->instruct_name[2] = "st";
+	data->instruct_name[3] = "add";
+	data->instruct_name[4] = "sub";
+	data->instruct_name[5] = "and";
+	data->instruct_name[6] = "or";
+	data->instruct_name[7] = "xor";
+	data->instruct_name[8] = "zjmp";
+	data->instruct_name[9] = "ldi";
+	data->instruct_name[10] = "sti";
+	data->instruct_name[11] = "fork";
+	data->instruct_name[12] = "lld";
+	data->instruct_name[13] = "lldi";
+	data->instruct_name[14] = "lfork";
+	data->instruct_name[15] = "aff";
+}
+
+int main(void)
 {
 	int fd;
 	t_data *data;
@@ -412,17 +463,19 @@ int main(int argc , char **argv)
 	data->instruction = 0;
 	data->cmd = 0;
 	data->lst = NULL;
-	if (argc != 2)
+	init_mas(data);
+//	if (argc != 2)
+//	{
+//		printf("Usage: <sourcefile.s> other extension not supported\n");
+//		return (0);
+//	}
+	char *file = "../corewar/champs/ex.s";
+	if ((fd = open(file, O_RDONLY)) == -1)
 	{
-		printf("Usage: <sourcefile.s> other extension not supported\n");
-		return (0);
-	}
-	if ((fd = open(argv[1], O_RDONLY)) == -1)
-	{
-		printf("Cannot read \"{%s}\" file", argv[1]);
+		printf("Cannot read \"{%s}\" file", file);
 		return 0;
 	}
-	if (!validate(fd, data, argv[1]))
+	if (!validate(fd, data, file))
 		return (0);
 //	int i  = 0;
 //	while (data->array[i])
