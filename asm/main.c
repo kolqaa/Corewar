@@ -132,7 +132,7 @@ int    copy_file_to_array(t_data *data, int fd)
 		copy_file(line, data);
 		free(line);
 	}
-	if (!ft_strcmp("\t", data->array[g_num_line - 1]))
+	if ((!ft_strcmp("\t", data->array[g_num_line - 1]) || !ft_strcmp("", data->array[g_num_line - 1])))
 	{
 		data->array[g_i - 1] = 0;
 		g_i = 0;
@@ -242,7 +242,7 @@ int exist_lable(char *lable_name, t_data *data, int line_nbr)
 		if (!ft_strncmp(lable_name, data->array[i], ft_strlen(lable_name)))
 		{
 			find++;
-			if(data->array[i][ft_strlen(lable_name)] != LABEL_CHAR) // если не добавить : к концу лейбла
+			if(data->array[i][ft_strlen(lable_name) - 1] != LABEL_CHAR) // если не добавить : к концу лейбла
 				find--;
 		}
 		i++;
@@ -289,9 +289,18 @@ int check_lable(char *line, t_data *data, int line_nbr)
 	return (1);
 }
 
-int   check_cmd(char *line, t_data *data, int line_nbr)
+int   check_cmd(char *line, t_data *data, int line_nbr, char *instruct_name)
 {
-	printf("instruction LINE = %s\n", line);
+	int i;
+	int skip = (int)ft_strlen(instruct_name);
+	i = 0;
+	while (i < skip)
+		i++;
+	if (ft_strstr(&line[i], instruct_name))
+	{
+		printf("TTHERE IS TWO CMD\n");
+		return (0);
+	}
 	return 1;
 }
 
@@ -305,7 +314,7 @@ int check_cmd_and_args(char *line, t_data *data, int line_nbr)
 	{
 		char *instruction = ft_strstr(line, data->instruct_name[i]);
 		if (instruction)
-			if (!check_cmd(instruction, data, line_nbr))
+			if (!check_cmd(line, data, line_nbr, data->instruct_name[i]))
 				return (0);
 		i++;
 	}
@@ -418,13 +427,7 @@ int   validate(int fd, t_data *data, char *prog_name)
 		return (0);
 	//if (is_valid_file(data))
 	//	return (1);
-//	return (0);
-//		if (ft_strstr(line, NAME_CMD_STRING))
-//			if (!check_name(fd, line, data))
-//				return (0);
-//		if (ft_strstr(line, COMMENT_CMD_STRING))
-//			if (!check_comment(fd, line, data))
-//				return (0);
+
 	printf("end while start printing...\n");
 	sleep(222);
 	return (1);
@@ -449,6 +452,7 @@ void    init_mas(t_data *data)
 	data->instruct_name[13] = "lldi";
 	data->instruct_name[14] = "lfork";
 	data->instruct_name[15] = "aff";
+	data->instruct_name[16] = NULL;
 }
 
 int main(void)
