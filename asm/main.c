@@ -289,33 +289,116 @@ int check_lable(char *line, t_data *data, int line_nbr)
 	return (1);
 }
 
+int ft_wordequ(char *string_to_find, char *ins[], char *word)
+{
+	char *tmp;
+	int k = 0;
+	while (ins[k])
+	{
+		tmp = find_cmd_in_string(string_to_find, ins[k]);
+		if (tmp)
+			return (1);
+		k++;
+	}
+	return (0);
+}
+
+int confirm_cmd(char *args_cmd, char *cmd_name)
+{
+
+	return (0);
+}
+int check_args(char *args_cmd, char *ins, int count, t_data *data)
+{
+	if ((ins == "sti" || ins == "add" || ins == "sub" || ins == "and" || ins == "or" ||
+		ins == "xor" || ins == "ldi" || ins == "lldi") && count == 2)
+		return (1);
+	if ((ins == "live" || ins == "fork" || ins == "lfork" || ins == "aff" || ins == "zjmp") && count == 0)
+		return (1);
+	if ((ins == "ld" || ins == "st" || ins == "lld") && count == 1)
+		return (1);
+	data->no_args = 1;
+	printf("\n");
+	return (0);
+}
 int   check_cmd(char *line, t_data *data, int line_nbr, char *instruct_name)
 {
 	int i;
+	int count = 0;
 	int skip = (int)ft_strlen(instruct_name);
 	i = 0;
 	while (i < skip)
 		i++;
-	if (ft_strstr(&line[i], instruct_name))
+	while (line[i] == ' ' || line[i] == '\t')
+		i++;
+	if (ft_wordequ(&line[i], data->instruct_name, instruct_name))
 	{
-		printf("TTHERE IS TWO CMD\n");
+		data->no_correct = 1;
+		printf("Did you know? There is should be one instruction per line! o_O READ SUBJECT BASTARDO!!!\n");
 		return (0);
 	}
+	while (line[i])
+	{
+		if (line[i] == ',')
+			count++;
+		i++;
+	}
+	if (!check_args(&line[i], instruct_name, count, data))
+	{
+		printf("To few/much arguments for {%s} command\n", instruct_name);
+		data->no_args = 1;
+		return (0);
+	}
+	confirm_cmd(&line[i], instruct_name);
+	data->cmd = 1;
 	return 1;
 }
 
+char		*find_cmd_in_string(const char *big, const char *little)
+ {
+	int		i;
+	char	*str;
+
+	str = (char *)big;
+	i = 0;
+	 int k = 0;
+	if (*little == '\0')
+		return (str);
+	while (str[i])
+	{
+		if (!ft_strncmp(&str[i], little, ft_strlen(little)) && str[i - 1] != LABEL_CHAR && str[i + ft_strlen(little)] != LABEL_CHAR)
+		{
+			if (little == "st" && str[i + 2] == 'i' && str[i + 1] != '\0')
+			{
+				i++;
+				continue;
+			}
+			if (little == "st" && str[i + 2] != ' ' && str[i + 1] != '\0')
+			{
+				i++;
+				continue;
+			}
+			return (&str[i]);
+		}
+		i++;
+	}
+	return (NULL);
+}
 
 int check_cmd_and_args(char *line, t_data *data, int line_nbr)
 {
 	int i;
 
 	i = 0;
+	//printf("(%s)\n", line);
 	while (data->instruct_name[i])
 	{
-		char *instruction = ft_strstr(line, data->instruct_name[i]);
+		char *instruction = find_cmd_in_string(line, data->instruct_name[i]);
 		if (instruction)
-			if (!check_cmd(line, data, line_nbr, data->instruct_name[i]))
+		{
+			if (!check_cmd(instruction, data, line_nbr, data->instruct_name[i]))
 				return (0);
+		}
 		i++;
 	}
 	return 1;
@@ -327,7 +410,7 @@ int parse_lbl(char *line, t_data *data, int line_nbr)
 	{
 		if (data->lable && !data->name && !data->comment)
 		{
-			printf("name and comment should be first than lable read subject WTF!!!??\n");
+			printf("MMMM... We have one little mistake here ... NAME AND COMMENT SHOULD BE FIRST THAN LABALE OR COMMAND, read SUBJECT BEFORE WRITE THIS SHIT AGAIN ;) GL\n");
 			return (0);
 		}
 		return (1);
@@ -341,11 +424,13 @@ int parse_cmd(char *line, t_data *data, int line_nbr)
 	{
 		if (data->cmd && !data->name && !data->comment)
 		{
-			printf("name and commnent should be first than lable read subject WTF!!!??\n");
+			printf("MMMM... We have one little mistake here ... NAME AND COMMENT SHOULD BE FIRST THAN LABALE OR COMMAND, read SUBJECT BEFORE WRITE THIS SHIT AGAIN ;) GL\n");
 			return (0);
 		}
 		return (1);
 	}
+	if (data->no_args || data->no_correct)
+		return (0);
 	return (1);
 }
 
@@ -362,15 +447,23 @@ int   parse_file(t_data *data)
 			continue;
 		}
 		if (ft_strstr(data->array[i], NAME_CMD_STRING))
+		{
 			if (!check_name(i, data->array[i], data, -1))
 				return 0;
+			i++;
+			continue;
+		}
 		if (ft_strstr(data->array[i], COMMENT_CMD_STRING))
+		{
 			if (!check_comment(i, data->array[i], data, -1))
 				return 0;
+			i++;
+			continue;
+		}
 		if (!parse_lbl(data->array[i], data, i))
-			 return 0;
+			return 0;
 		if (!parse_cmd(data->array[i], data, i))
-				return (0);
+			return (0);
 		i++;
 	}
 		//write_line(&(data->lst), data->array[i]);
@@ -436,9 +529,9 @@ int   validate(int fd, t_data *data, char *prog_name)
 
 void    init_mas(t_data *data)
 {
-	data->instruct_name[0] = "live";
+	data->instruct_name[0] = "lldi";
 	data->instruct_name[1] = "ld";
-	data->instruct_name[2] = "st";
+	data->instruct_name[2] = "sti";
 	data->instruct_name[3] = "add";
 	data->instruct_name[4] = "sub";
 	data->instruct_name[5] = "and";
@@ -446,12 +539,12 @@ void    init_mas(t_data *data)
 	data->instruct_name[7] = "xor";
 	data->instruct_name[8] = "zjmp";
 	data->instruct_name[9] = "ldi";
-	data->instruct_name[10] = "sti";
+	data->instruct_name[10] = "aff";
 	data->instruct_name[11] = "fork";
 	data->instruct_name[12] = "lld";
-	data->instruct_name[13] = "lldi";
+	data->instruct_name[13] = "live";
 	data->instruct_name[14] = "lfork";
-	data->instruct_name[15] = "aff";
+	data->instruct_name[15] = "st";
 	data->instruct_name[16] = NULL;
 }
 
@@ -466,6 +559,8 @@ int main(void)
 	data->lable = 0;
 	data->instruction = 0;
 	data->cmd = 0;
+	data->no_args = 0;
+	data->no_correct = 0;
 	data->lst = NULL;
 	init_mas(data);
 //	if (argc != 2)

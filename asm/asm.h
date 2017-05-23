@@ -10,8 +10,6 @@
 #define UNEXPECTED_INPUT "Syntax error - unexpected end of input (Perhaps you forgot to end with a newline ?)\n"
 #define COMMAND_LABLE 1
 #define FIRST_LABLE 0
-#define RETURN1 return (1);
-#define RETURN0 return (0)
 
 int g_num_line = 0;
 int g_start_mem_arr_size = 5;
@@ -36,10 +34,12 @@ typedef struct s_data
 	int name;
 	int comment;
 	char    **array;
+	int no_args;
+	int no_correct;
 	m_lst *lst;
 
 }              t_data;
 
-
+char *find_cmd_in_string(const char *big, const char *little);
 #endif
 
