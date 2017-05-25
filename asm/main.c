@@ -350,6 +350,7 @@ int   check_cmd(char *line, t_data *data, int line_nbr, char *instruct_name)
 		return (0);
 	}
 	confirm_cmd(&line[i], instruct_name);
+	printf("OK\n");
 	data->cmd = 1;
 	return 1;
 }
@@ -361,7 +362,6 @@ char		*find_cmd_in_string(const char *big, const char *little)
 
 	str = (char *)big;
 	i = 0;
-	 int k = 0;
 	if (*little == '\0')
 		return (str);
 	while (str[i])
@@ -584,6 +584,9 @@ int main(void)
 //		printf("{%s}\n", data->array[i]);
 //		i++;
 //	}
+	/* нужно распарсить аргументы и проверить их, еще нужно проверить в строке разный мусор кроме лейбла и комманды
+	 * команду в строке ищет что бы только одна была
+	 */
 	return (0);
 
 }
