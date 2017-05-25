@@ -305,17 +305,17 @@ int ft_wordequ(char *string_to_find, char *ins[], char *word)
 
 int confirm_cmd(char *args_cmd, char *cmd_name)
 {
-
+	printf("CONFIRM THIS-->%s instruction-->%s\n", args_cmd, cmd_name);
 	return (0);
 }
 int check_args(char *args_cmd, char *ins, int count, t_data *data)
 {
-	if ((ins == "sti" || ins == "add" || ins == "sub" || ins == "and" || ins == "or" ||
-		ins == "xor" || ins == "ldi" || ins == "lldi") && count == 2)
+	if ((!ft_strcmp(ins, "sti") || !ft_strcmp(ins, "add")  || !ft_strcmp(ins, "sub")  || !ft_strcmp(ins, "and")  || !ft_strcmp(ins, "or") ||
+			!ft_strcmp(ins, "xor") || !ft_strcmp(ins, "ldi")  || !ft_strcmp(ins, "lldi")) && (count == 2))
 		return (1);
-	if ((ins == "live" || ins == "fork" || ins == "lfork" || ins == "aff" || ins == "zjmp") && count == 0)
+	if ((!ft_strcmp(ins, "live") || !ft_strcmp(ins, "fork") || !ft_strcmp(ins, "lfork") || !ft_strcmp(ins, "aff") || !ft_strcmp(ins, "zjmp")) && (count == 0))
 		return (1);
-	if ((ins == "ld" || ins == "st" || ins == "lld") && count == 1)
+	if ((!ft_strcmp(ins, "ld")|| !ft_strcmp(ins, "st") || !ft_strcmp(ins, "lld")) && (count == 1))
 		return (1);
 	data->no_args = 1;
 	printf("\n");
@@ -337,6 +337,7 @@ int   check_cmd(char *line, t_data *data, int line_nbr, char *instruct_name)
 		printf("Did you know? There is should be one instruction per line! o_O READ SUBJECT BASTARDO!!!\n");
 		return (0);
 	}
+	int k = i;
 	while (line[i])
 	{
 		if (line[i] == ',')
@@ -349,7 +350,7 @@ int   check_cmd(char *line, t_data *data, int line_nbr, char *instruct_name)
 		data->no_args = 1;
 		return (0);
 	}
-	confirm_cmd(&line[i], instruct_name);
+	confirm_cmd(&line[k], instruct_name);
 	printf("OK\n");
 	data->cmd = 1;
 	return 1;
@@ -368,12 +369,12 @@ char		*find_cmd_in_string(const char *big, const char *little)
 	{
 		if (!ft_strncmp(&str[i], little, ft_strlen(little)) && str[i - 1] != LABEL_CHAR && str[i + ft_strlen(little)] != LABEL_CHAR)
 		{
-			if (little == "st" && str[i + 2] == 'i' && str[i + 1] != '\0')
+			if (!ft_strcmp(little, "st") && str[i + 2] == 'i' && str[i + 1] != '\0')
 			{
 				i++;
 				continue;
 			}
-			if (little == "st" && str[i + 2] != ' ' && str[i + 1] != '\0')
+			if (!ft_strcmp(little, "st") && str[i + 2] != ' ' && str[i + 1] != '\0')
 			{
 				i++;
 				continue;
@@ -390,7 +391,6 @@ int check_cmd_and_args(char *line, t_data *data, int line_nbr)
 	int i;
 
 	i = 0;
-	//printf("(%s)\n", line);
 	while (data->instruct_name[i])
 	{
 		char *instruction = find_cmd_in_string(line, data->instruct_name[i]);
@@ -466,13 +466,6 @@ int   parse_file(t_data *data)
 			return (0);
 		i++;
 	}
-		//write_line(&(data->lst), data->array[i]);
-//	head = data->lst;
-//	while (head != NULL)
-//	{
-//		printf("LST {%s}\n", head->command);
-//		head = head->next;
-//	}
 	return 1;
 }
 
