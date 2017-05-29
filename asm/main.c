@@ -99,7 +99,6 @@ void copy_file(char *line, t_data *data)
 	int j;
 	int new_mem;
 
-	new_mem = 0;
 	index = 0;
 	if (g_i > g_start_mem_arr_size)
 	{
@@ -233,9 +232,8 @@ int exist_lable(char *lable_name, t_data *data, int line_nbr)
 		find++;
 	while (data->array[i])
 	{
-		if ((i == line_nbr) || (data->array[i][0] == COMMENT_CHAR))//segmentation
+		if ((i == line_nbr) || (data->array[i][0] == COMMENT_CHAR))
 		{
-			//printf("MY LINE IN EXIST: {%s LABLE NAME: %s}\n", data->array[line_nbr], lable_name);
 			i++;
 			continue ;
 		}
@@ -303,10 +301,27 @@ int ft_wordequ(char *string_to_find, char *ins[], char *word)
 	return (0);
 }
 
-int confirm_cmd(char *args_cmd, char *cmd_name)
+int take_index_by_name(t_data *data, char *name_cmd)
 {
-	printf("CONFIRM THIS-->%s instruction-->%s\n", args_cmd, cmd_name);
+	int i;
+
+	i = 0;
+	while (i < 16)
+	{
+		if (!ft_strcmp(g_op_tab[i].op, name_cmd))
+			break;
+		i++;
+	}
+	return (i);
+}
+
+int confirm_cmd(char *args_cmd, char *cmd_name, t_data *data)
+{
+	data->index = take_index_by_name(data, cmd_name);
+	printf("instruction-->%s CONFIRM THIS-->%s cmd index = %d args_nbr=%d\n", cmd_name, args_cmd, data->index, g_op_tab[data->index].args_nbr);
+	printf("t_type arg %d\n", g_op_tab[data->index].type[0]);
 	return (0);
+
 }
 int check_args(char *args_cmd, char *ins, int count, t_data *data)
 {
@@ -350,14 +365,14 @@ int   check_cmd(char *line, t_data *data, int line_nbr, char *instruct_name)
 		data->no_args = 1;
 		return (0);
 	}
-	confirm_cmd(&line[k], instruct_name);
+	confirm_cmd(&line[k], instruct_name, data);
 	printf("OK\n");
 	data->cmd = 1;
 	return 1;
 }
 
 char		*find_cmd_in_string(const char *big, const char *little)
- {
+{
 	int		i;
 	char	*str;
 
@@ -469,7 +484,7 @@ int   parse_file(t_data *data)
 	return 1;
 }
 
-int bonus_validate(t_data *data)
+int check_again(t_data *data)
 {
 	if ((data->name && !data->comment) || (!data->name && data->comment))
 	{
@@ -509,7 +524,7 @@ int   validate(int fd, t_data *data, char *prog_name)
 		return (0);
 	if (!parse_file(data))
 		return (0);
-	if (!bonus_validate(data))
+	if (!check_again(data))
 		return (0);
 	//if (is_valid_file(data))
 	//	return (1);
@@ -547,14 +562,7 @@ int main(void)
 	t_data *data;
 
 	data = (t_data*)malloc(sizeof(*data));
-	data->name = 0;
-	data->comment = 0;
-	data->lable = 0;
-	data->instruction = 0;
-	data->cmd = 0;
-	data->no_args = 0;
-	data->no_correct = 0;
-	data->lst = NULL;
+	ft_memset(data, 0, sizeof(*data));
 	init_mas(data);
 //	if (argc != 2)
 //	{
@@ -577,9 +585,6 @@ int main(void)
 //		printf("{%s}\n", data->array[i]);
 //		i++;
 //	}
-	/* нужно распарсить аргументы и проверить их, еще нужно проверить в строке разный мусор кроме лейбла и комманды
-	 * команду в строке ищет что бы только одна была
-	 */
 	return (0);
 
 }

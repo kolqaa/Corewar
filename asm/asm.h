@@ -26,17 +26,18 @@ typedef struct       lst
 
 typedef struct s_data
 {
-	int lable;
-	char *cmd_lbl_name;
-	int instruction;
-	char *instruct_name[17];
-	int cmd;
-	int name;
-	int comment;
+	int     lable;
+	char    *cmd_lbl_name;
+	int     instruction;
+	char    *instruct_name[17];
+	int     index;
+	int     cmd;
+	int     name;
+	int     comment;
 	char    **array;
-	int no_args;
-	int no_correct;
-	m_lst *lst;
+	int     no_args;
+	int     no_correct;
+	m_lst   *lst;
 
 }              t_data;
 
