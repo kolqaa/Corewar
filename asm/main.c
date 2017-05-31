@@ -306,7 +306,7 @@ int take_index_by_name(t_data *data, char *name_cmd)
 	int i;
 
 	i = 0;
-	while (i < 16)
+	while (i < 17)
 	{
 		if (!ft_strcmp(g_op_tab[i].op, name_cmd))
 			break;
@@ -315,11 +315,26 @@ int take_index_by_name(t_data *data, char *name_cmd)
 	return (i);
 }
 
+void    take_arg(t_data *data, char *args_cmd)
+{
+	int i;
+
+	i = 0;
+	while (args_cmd[i])
+	{
+		if (args_cmd[i] == ',')
+		{
+			data->arg[]
+		}
+	}
+}
+
+
 int confirm_cmd(char *args_cmd, char *cmd_name, t_data *data)
 {
 	data->index = take_index_by_name(data, cmd_name);
 	printf("instruction-->%s CONFIRM THIS-->%s cmd index = %d args_nbr=%d\n", cmd_name, args_cmd, data->index, g_op_tab[data->index].args_nbr);
-	printf("t_type arg %d\n", g_op_tab[data->index].type[0]);
+	take_arg(data, args_cmd);
 	return (0);
 
 }
