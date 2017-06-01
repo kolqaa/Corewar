@@ -32,7 +32,7 @@ typedef struct s_data
 	char    *instruct_name[17];
 	int     index;
 	int     cmd;
-	char    *arg[3];
+	char    **array_args;
 	int     name;
 	int     comment;
 	char    **array;

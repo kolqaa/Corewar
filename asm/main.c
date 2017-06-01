@@ -315,17 +315,57 @@ int take_index_by_name(t_data *data, char *name_cmd)
 	return (i);
 }
 
-void    take_arg(t_data *data, char *args_cmd)
+
+
+void copy_args_to_array(t_data *data, char *args_cmd)
+{
+	int i;
+	int j;
+	int k;
+
+	i = 0;
+	j = 0;
+	while (i < g_op_tab[data->index].args_nbr)
+	{
+		k = 0;
+		while (args_cmd[j] != ',' && args_cmd[j])
+		{
+			printf("(%c", args_cmd[j]);
+			if (args_cmd[j] == ',')
+			{
+				j++;
+				break ;
+			}
+			data->array_args[i][k++] = args_cmd[j++];
+		}
+		data->array_args[i][k] = '\0';
+		i++;
+	}
+
+}
+
+void    create_args_array(t_data *data, char *args_cmd, char *cmd_name)
 {
 	int i;
 
 	i = 0;
-	while (args_cmd[i])
+	int k;
+	int count = 0;
+
+	k = 0;
+	data->array_args = (char **)malloc(sizeof(char *) * (g_op_tab[data->index].args_nbr));
+	data->array_args[g_op_tab[data->index].args_nbr] = 0;
+	while (i < g_op_tab[data->index].args_nbr)
 	{
-		if (args_cmd[i] == ',')
+		while (args_cmd[k] != ',' && args_cmd[k])
 		{
-			data->arg[]
+			if (args_cmd[k] != ' ' && args_cmd[k] != ',')
+				count++;
+			k++;
 		}
+		data->array_args[i] = (char *)malloc(sizeof(char) * (count + 1));
+		i++;
+		count = 0;
 	}
 }
 
@@ -334,7 +374,12 @@ int confirm_cmd(char *args_cmd, char *cmd_name, t_data *data)
 {
 	data->index = take_index_by_name(data, cmd_name);
 	printf("instruction-->%s CONFIRM THIS-->%s cmd index = %d args_nbr=%d\n", cmd_name, args_cmd, data->index, g_op_tab[data->index].args_nbr);
-	take_arg(data, args_cmd);
+	create_args_array(data, args_cmd, cmd_name);
+	copy_args_to_array(data, args_cmd);
+	int i = -1;
+	while (++i < g_op_tab[data->index].args_nbr)
+		printf("aray %s\n", data->array_args[i]);
+	free(data->array_args);
 	return (0);
 
 }
