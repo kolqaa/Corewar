@@ -30,19 +30,15 @@ int get_type(t_data *data, char *arg)
 int confirm_cmd(char *args_cmd, char *cmd_name, t_data *data)
 {
 	data->index = take_index_by_name(data, cmd_name);
-	printf("instruction-->%s CONFIRM THIS-->%s cmd index = %d args_nbr=%d\n", cmd_name, args_cmd, data->index, g_op_tab[data->index].args_nbr);
 	create_args_array(data, args_cmd, cmd_name);
 	copy_args_to_array(data, args_cmd);
 	int i = -1;
 	while (++i < g_op_tab[data->index].args_nbr)
 	{
-		//printf("my %s\n", data->array_args[i]);
-		//int d = get_type(data, data->array_args[i]);
-		//printf("RETURN VALUE = %d\n", d);
 		if (g_op_tab[data->index].type[i] & get_type(data, data->array_args[i]))
 			continue;
 		else
-			exit(printf("oh my god!!! are you joke?!! THE {%s} is not normal type for instruction %s\n", data->array_args[i], cmd_name));
+			exit(printf(NOT_VALID_ARG_FOR_INSTRUCT, data->array_args[i], cmd_name));
 	}
 	free(data->array_args);
 	return (0);
@@ -76,8 +72,7 @@ int   check_cmd(char *line, t_data *data, int line_nbr, char *instruct_name)
 	if (ft_wordequ(&line[i], data->instruct_name, instruct_name))
 	{
 		data->no_correct = 1;
-		printf("Did you know? There is should be one instruction per line! o_O READ SUBJECT BASTARDO!!!\n");
-		return (0);
+		exit(printf(ONE_INSTRUCT_PER_LINE));
 	}
 	int k = i;
 	while (line[i])
@@ -88,12 +83,10 @@ int   check_cmd(char *line, t_data *data, int line_nbr, char *instruct_name)
 	}
 	if (!check_args(&line[i], instruct_name, count, data))
 	{
-		printf("To few/much arguments for {%s} command\n", instruct_name);
 		data->no_args = 1;
-		return (0);
+		exit(printf(TO_FEW_MUCH_ARG, instruct_name));
 	}
 	confirm_cmd(&line[k], instruct_name, data);
-	printf("OK\n");
 	data->cmd = 1;
 	return 1;
 }
@@ -152,10 +145,7 @@ int parse_cmd(char *line, t_data *data, int line_nbr)
 	if (check_cmd_and_args(line, data, line_nbr))
 	{
 		if (data->cmd && !data->name && !data->comment)
-		{
-			printf("MMMM... We have one little mistake here ... NAME AND COMMENT SHOULD BE FIRST THAN LABALE OR COMMAND, read SUBJECT BEFORE WRITE THIS SHIT AGAIN ;) GL\n");
-			return (0);
-		}
+			exit(printf(NAME_AND_COMMENT_FIRST));
 		return (1);
 	}
 	if (data->no_args || data->no_correct)

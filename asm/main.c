@@ -1,8 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "asm.h"
-#include "../op.h"
 
+int g_num_line = 0;
+int g_start_mem_arr_size = 5;
+int g_new_mem_arr_size = 1;
+int g_i = 0;
 
 int   parse_file(t_data *data)
 {
@@ -80,7 +83,7 @@ void    init_mas(t_data *data)
 	data->instruct_name[16] = NULL;
 }
 
-int main(void)
+int main(int argc, char **argv)
 {
 	int fd;
 	t_data *data;
@@ -88,18 +91,18 @@ int main(void)
 	data = (t_data*)malloc(sizeof(*data));
 	ft_memset(data, 0, sizeof(*data));
 	init_mas(data);
-//	if (argc != 2)
-//	{
-//		printf("Usage: <sourcefile.s> other extension not supported\n");
-//		return (0);
-//	}
+	if (argc != 2)
+	{
+		printf("Usage: <sourcefile.s> other extension not supported\n");
+		return (0);
+	}
 	char *file = "../corewar/champs/ex.s";
-	if ((fd = open(file, O_RDONLY)) == -1)
+	if ((fd = open(argv[1], O_RDONLY)) == -1)
 	{
 		printf("Cannot read \"{%s}\" file", file);
 		return 0;
 	}
-	if (!validate(fd, data, file))
+	if (!validate(fd, data, argv[1]))
 		return (0);
 	return (0);
 

@@ -1,32 +1,16 @@
 #include "asm.h"
 
-char		*ft_copyLable(char *dst, const char *src, size_t len)
-{
-	size_t	i;
-
-	i = 0;
-	dst = (char *)malloc(sizeof(char) * (len + 2));
-	while (i < len && src[i] != '\0')
-	{
-		dst[i] = src[i];
-		i++;
-	}
-	dst[i] = ':';
-	dst[i + 1] = '\0';
-	return (dst);
-}
-
 int help_confirm_lable(char *line, t_data *data, int cmd_lbl)
 {
+	int i;
+
+	i = 0;
 	while (line[i] != ' ' && line[i] != '\t' && line[i] != '\n' && line[i] != LABEL_CHAR && line[i] != COMMENT_CHAR)
 	{
 		if (is_lable_char(line[i]))
 			i++;
 		else
-		{
-			printf("{%c} its not lable char man!!!! WTF BITCH\n", line[i]);
-			return (0);
-		}
+			exit(printf(NOT_LABLE_CHAR, line[i]));
 	}
 	data->lable = 1;
 	return (1);
@@ -44,10 +28,8 @@ int confirm_lbl(char *line, t_data * data, int cmd_lbl)
 			if (is_lable_char(line[i]))
 				i++;
 			else
-			{
-				printf("{%c} its not lable char man!!!! WTF BITCH\n", line[i]);
-				return (0);
-			}
+				exit(printf(NOT_LABLE_CHAR, line[i]));
+
 		}
 		data->lable = 1;
 		data->cmd_lbl_name = ft_copyLable(data->cmd_lbl_name, line, (size_t) i);
@@ -57,6 +39,8 @@ int confirm_lbl(char *line, t_data * data, int cmd_lbl)
 		return (0);
 	return (1);
 }
+
+
 int exist_lable(char *lable_name, t_data *data, int line_nbr)
 {
 	int i;
@@ -96,10 +80,7 @@ int check_lable(char *line, t_data *data, int line_nbr)
 
 	i = 0;
 	if (line[0] == LABEL_CHAR)
-	{
-		printf(BEGINNING_LABLE_CHAR);
-		return (0);
-	}
+		exit(printf(BEGINNING_LABLE_CHAR));
 	while (line[i])
 	{
 		if (line[i] == COMMENT_CHAR)
@@ -119,34 +100,6 @@ int check_lable(char *line, t_data *data, int line_nbr)
 		i++;
 	}
 	return (1);
-}
-int parse_lbl(char *line, t_data *data, int line_nbr)
-{
-	if (check_lable(line, data, line_nbr))
-	{
-		if (data->lable && !data->name && !data->comment)
-		{
-			printf("MMMM... We have one little mistake here ... NAME AND COMMENT SHOULD BE FIRST THAN LABALE OR COMMAND, read SUBJECT BEFORE WRITE THIS SHIT AGAIN ;) GL\n");
-			return (0);
-		}
-		return (1);
-	}
-	return (1);
-}
-
-
-int is_lable_char(char lbl)
-{
-	int i;
-
-	i = 0;
-	while (LABEL_CHARS[i])
-	{
-		if (lbl == LABEL_CHARS[i])
-			return (1);
-		i++;
-	}
-	return (0);
 }
 
 
