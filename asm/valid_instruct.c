@@ -12,6 +12,8 @@ int get_type(t_data *data, char *arg)
 			return (T_REG);
 		else if (arg[i] == '%')
 		{
+			if (arg[i + 1] == '-')
+				i++;
 			if ((arg[i + 1] == ':') || ft_isdigit(arg[i + 1]))
 				return (T_DIR);
 			else
@@ -41,12 +43,12 @@ int confirm_cmd(char *args_cmd, char *cmd_name, t_data *data)
 		else
 			exit(printf(NOT_VALID_ARG_FOR_INSTRUCT, data->array_args[i], cmd_name));
 	}
-	free(data->array_args);
+	//free(data->array_args);
 	return (0);
 
 }
 
-int check_args(char *args_cmd, char *ins, int count, t_data *data)
+int check_args(char *ins, int count, t_data *data)
 {
 	if ((!ft_strcmp(ins, "sti") || !ft_strcmp(ins, "add")  || !ft_strcmp(ins, "sub")  || !ft_strcmp(ins, "and")  || !ft_strcmp(ins, "or") ||
 	     !ft_strcmp(ins, "xor") || !ft_strcmp(ins, "ldi")  || !ft_strcmp(ins, "lldi")) && (count == 2))
@@ -59,7 +61,7 @@ int check_args(char *args_cmd, char *ins, int count, t_data *data)
 	return (0);
 }
 
-int   check_cmd(char *line, t_data *data, int line_nbr, char *instruct_name)
+int   check_cmd(char *line, t_data *data, char *instruct_name)
 {
 	int i;
 	int count = 0;
@@ -81,7 +83,7 @@ int   check_cmd(char *line, t_data *data, int line_nbr, char *instruct_name)
 			count++;
 		i++;
 	}
-	if (!check_args(&line[i], instruct_name, count, data))
+	if (!check_args(instruct_name, count, data))
 	{
 		data->no_args = 1;
 		exit(printf(TO_FEW_MUCH_ARG, instruct_name));
@@ -91,25 +93,26 @@ int   check_cmd(char *line, t_data *data, int line_nbr, char *instruct_name)
 	return 1;
 }
 
-char		*find_cmd_in_string(const char *big, const char *little)
+char		*find_cmd_in_string(const char *find_in, const char *instr)
 {
 	int		i;
 	char	*str;
 
-	str = (char *)big;
+	str = (char *)find_in;
 	i = 0;
-	if (*little == '\0')
+	if (*instr == '\0')
 		return (str);
 	while (str[i])
 	{
-		if (!ft_strncmp(&str[i], little, ft_strlen(little)) && str[i - 1] != LABEL_CHAR && str[i + ft_strlen(little)] != LABEL_CHAR)
+		if (str[i] == COMMENT_CHAR)
+			break;
+		if (!ft_strncmp(&str[i], instr, ft_strlen(instr)) && str[i - 1] != LABEL_CHAR && str[i + ft_strlen(instr)] != LABEL_CHAR)
 		{
-			if (!ft_strcmp(little, "st") && str[i + 2] == 'i' && str[i + 1] != '\0')
-			{
-				i++;
-				continue;
-			}
-			if (!ft_strcmp(little, "st") && str[i + 2] != ' ' && str[i + 1] != '\0')
+			if ((!ft_strcmp(instr, "st") && str[i + 2] == 'i' && str[i + 1] != '\0') ||
+					(!ft_strcmp(instr, "st") && str[i + 2] != '\t'  && str[i + 2] != ' ' && str[i + 1] != '\0') ||
+					(!ft_strcmp(instr, "or") && str[i + 2] != ' ' && str[i + 2] != '\t' && str[i + 1] != '\0') ||
+					(!ft_strcmp(instr, "live") && str[i - 1] != ' ' && str[i - 1] != '\t' && str[i - 1]) ||
+					(!ft_strcmp(instr, "ld") && str[i + 2] != ' ' && str[i + 2] != '\t'))
 			{
 				i++;
 				continue;
@@ -120,54 +123,3 @@ char		*find_cmd_in_string(const char *big, const char *little)
 	}
 	return (NULL);
 }
-
-
-int check_cmd_and_args(char *line, t_data *data, int line_nbr)
-{
-	int i;
-	char *instruction;
-
-	i = 0;
-	int flag = 0;
-	while (data->instruct_name[i])
-	{
-		instruction = find_cmd_in_string(line, data->instruct_name[i]);
-		if (instruction)
-		{
-			if (!check_cmd(instruction, data, line_nbr, data->instruct_name[i]))
-				return (0);
-			flag = 1;
-		}
-		i++;
-	}
-	if (!data->lable && !data->cmd)
-		exit(printf("There is no valid line\n"));
-	if (!flag && !data->lable && data->arguments)
-		exit(printf("Find argument for instruction, but didnt see instruction\n"));
-	if (!flag && data->lable && data->arguments)
-		exit(printf("Find argument for instruction2, but didnt see instruction\n"));
-	else
-		return 1;
-}
-
-int parse_cmd(char *line, t_data *data, int line_nbr)
-{
-	printf("cmd line = %s\n", line);
-	int i = 0;
-	while (line[i])
-	{
-		if (line[i] == ',' || line[i] == 'r' || line[i] == '%')
-			data->arguments++;
-		i++;
-	}
-	if (check_cmd_and_args(line, data, line_nbr))
-	{
-		if (data->cmd && !data->name && !data->comment)
-			exit(printf(NAME_AND_COMMENT_FIRST));
-		return (1);
-	}
-	if (data->no_args || data->no_correct)
-		return (0);
-	return (1);
-}
-

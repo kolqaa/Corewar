@@ -60,17 +60,17 @@ int exist_lable(char *lable_name, t_data *data, int line_nbr)
 		if (!ft_strncmp(lable_name, data->array[i], ft_strlen(lable_name)))
 		{
 			find++;
-			if(data->array[i][ft_strlen(lable_name) - 1] != LABEL_CHAR) // если не добавить : к концу лейбла
+			if(data->array[i][ft_strlen(lable_name) - 1] != LABEL_CHAR)
 				find--;
 		}
 		i++;
 	}
 	if (find)
 	{
-		free(data->cmd_lbl_name);
+		//free(data->cmd_lbl_name);
 		return (1);
 	}
-	free(data->cmd_lbl_name);
+	//free(data->cmd_lbl_name);
 	return (0);
 }
 

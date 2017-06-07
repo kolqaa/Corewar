@@ -66,11 +66,6 @@ int   validate(int fd, t_data *data, char *prog_name)
 		return (0);
 	if (!check_again(data))
 		return (0);
-	//if (is_valid_file(data))
-	//	return (1);
-
-	printf("end while start printing...\n");
-	sleep(222);
 	return (1);
 
 }
@@ -104,19 +99,21 @@ int main(int argc, char **argv)
 	data = (t_data*)malloc(sizeof(*data));
 	ft_memset(data, 0, sizeof(*data));
 	init_mas(data);
-	if (argc != 2)
-	{
-		printf("Usage: <sourcefile.s> other extension not supported\n");
-		return (0);
-	}
-	char *file = "../corewar/champs/ex.s";
-	if ((fd = open(argv[1], O_RDONLY)) == -1)
+	data->arguments = 0;
+	//if (argc != 2)
+	//{
+	//	printf("Usage: <sourcefile.s> other extension not supported\n");
+	//	return (0);
+	//}
+	char *file = "../corewar/champs/toto.s";
+	if ((fd = open(file, O_RDONLY)) == -1)
 	{
 		printf("Cannot read \"{%s}\" file", file);
 		return 0;
 	}
-	if (!validate(fd, data, argv[1]))
+	if (!validate(fd, data, file))
 		return (0);
+	printf("CHETKIY IGROK EBA EDEM DALSHE\n");
 	return (0);
 
 }

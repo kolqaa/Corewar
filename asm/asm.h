@@ -1,9 +1,23 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   assembler.h                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: vtymchen <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2017/05/11 16:20:41 by vtymchen          #+#    #+#             */
+/*   Updated: 2017/05/11 16:20:45 by vtymchen         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef ASM_H
-#define ASM_H
-#include "../libft/libft.h"
-//#include "../op.h"
+# define ASM_H
+
+# include <fcntl.h>
+# include "op.h"
 #include <stdio.h>
-//#include "../libft/ft_printf/header.h"
+# include "../libft/get_next_line.h"
+//# include "../ft_printf/ft_printf.h"
 
 #define NAME_ERROR "Champion name to long (Max length 128 bytes)\n"
 #define COMMENT_ERROR "Champion comment too long (Max length 2048)\n"
@@ -13,58 +27,11 @@
 #define BEGINNING_LABLE_CHAR "LABLE CHAR cant be at the begginig of string, whuzup?\n"
 #define NOT_LABLE_CHAR "{%c} It is not lable char!! WTF MAN\n"
 #define NAME_AND_COMMENT_FIRST "MMMM... We have one little mistake here ... NAME AND COMMENT SHOULD BE FIRST THAN LABALE OR COMMAND, read SUBJECT BEFORE WRITE THIS SHIT AGAIN\n"
-#define NOT_VALID_ARG_FOR_INSTRUCT "oh my god!!! are you joke?!! THE {%s} is not normal type for instruction %s\n"
+#define NOT_VALID_ARG_FOR_INSTRUCT "THE {%s} is not normal type for instruction %s\n"
 #define TO_FEW_MUCH_ARG "To few/much arguments for {%s} command\n"
 #define ONE_INSTRUCT_PER_LINE "Did you know? There is should be one instruction per line! o_O READ SUBJECT BASTARDO!!!\n"
 #define COMMAND_LABLE 1
 #define FIRST_LABLE 0
-
-# define REG_CODE				1
-# define DIR_CODE				2
-# define IND_CODE				3
-
-
-#define MAX_ARGS_NUMBER			4
-#define MAX_PLAYERS				4
-#define MEM_SIZE				(4*1024)
-#define IDX_MOD					(MEM_SIZE / 8)
-#define CHAMP_MAX_SIZE			(MEM_SIZE / 6)
-
-#define COMMENT_CHAR			'#'
-#define LABEL_CHAR				':'
-#define DIRECT_CHAR				'%'
-#define SEPARATOR_CHAR			','
-
-#define LABEL_CHARS				"abcdefghijklmnopqrstuvwxyz_0123456789"
-
-#define NAME_CMD_STRING			".name"
-#define COMMENT_CMD_STRING		".comment"
-
-#define REG_NUMBER				16
-
-#define CYCLE_TO_DIE			1536
-#define CYCLE_DELTA				50
-#define NBR_LIVE				21
-#define MAX_CHECKS				10
-
-/*
-**
-*/
-
-typedef char	t_arg_type;
-
-#define T_REG					1
-#define T_DIR					2
-#define T_IND					4
-#define T_LAB					8
-
-/*
-**
-*/
-
-# define PROG_NAME_LENGTH		(128)
-# define COMMENT_LENGTH			(2048)
-# define COREWAR_EXEC_MAGIC		0xea83f3
 
 extern int g_num_line;
 extern int g_start_mem_arr_size;
@@ -85,59 +52,75 @@ typedef struct s_data
 	int     no_args;
 	int     no_correct;
 	int     arguments;
-	int     is_empty;
 }              t_data;
 
-typedef struct		header_s
+typedef struct		s_line
 {
-	unsigned int		magic;
-	char				prog_name[PROG_NAME_LENGTH + 1];
-	unsigned int		prog_size;
-	char				comment[COMMENT_LENGTH + 1];
-}					header_t;
+	char	*label;
+	char	*op;
+	int		pos;
+	int		need_bytes;
+	char	**args;
+}					t_line;
 
-
-typedef struct    s_op
+typedef struct		s_asm
 {
-	char        op[5];
-	int            args_nbr;
-	t_arg_type    type[3];
-	char        op_code;
-	int            cycles;
-	char        desc[100];
-	int            coding_byte;
-	int            flag;
-}                t_op;
+	int				in_fd;
+	int				out_fd;
+	t_header		*header;
+	unsigned char	*byte_code;
+	int				byte;
+	t_list			*lines_list;
+	char			*name;
+}					t_asm;
 
-static struct s_op  g_op_tab[17] =
-		{
-				{"live", 1, {T_DIR}, 1, 10, "alive", 0, 0},
-				{"ld", 2, {T_DIR | T_IND, T_REG}, 2, 5, "load", 1, 0},
-				{"st", 2, {T_REG, T_IND | T_REG}, 3, 5, "store", 1, 0},
-				{"add", 3, {T_REG, T_REG, T_REG}, 4, 10, "addition", 1, 0},
-				{"sub", 3, {T_REG, T_REG, T_REG}, 5, 10, "soustraction", 1, 0},
-				{"and", 3, {T_REG | T_DIR | T_IND, T_REG | T_IND | T_DIR, T_REG}, 6, 6,
-						"et (and  r1, r2, r3   r1&r2 -> r3", 1, 0},
-				{"or", 3, {T_REG | T_IND | T_DIR, T_REG | T_IND | T_DIR, T_REG}, 7, 6,
-						"ou  (or   r1, r2, r3   r1 | r2 -> r3", 1, 0},
-				{"xor", 3, {T_REG | T_IND | T_DIR, T_REG | T_IND | T_DIR, T_REG}, 8, 6,
-						"ou (xor  r1, r2, r3   r1^r2 -> r3", 1, 0},
-				{"zjmp", 1, {T_DIR}, 9, 20, "jump if zero", 0, 1},
-				{"ldi", 3, {T_REG | T_DIR | T_IND, T_DIR | T_REG, T_REG}, 10, 25,
-						"load index", 1, 1},
-				{"sti", 3, {T_REG, T_REG | T_DIR | T_IND, T_DIR | T_REG}, 11, 25,
-						"store index", 1, 1},
-				{"fork", 1, {T_DIR}, 12, 800, "fork", 0, 1},
-				{"lld", 2, {T_DIR | T_IND, T_REG}, 13, 10, "long load", 1, 0},
-				{"lldi", 3, {T_REG | T_DIR | T_IND, T_DIR | T_REG, T_REG}, 14, 50,
-						"long load index", 1, 1},
-				{"lfork", 1, {T_DIR}, 15, 1000, "long fork", 0, 1},
-				{"aff", 1, {T_REG}, 16, 2, "aff", 1, 0},
-				{0, 0, {0}, 0, 0, 0, 0, 0}
-		};
+void				write_name(int in, char *line, t_asm *as);
+void				write_magic(int out_fd);
+void				write_comment(int in, char *line, t_asm *as);
+void				write_byte_code(t_asm *as);
+void				std_error();
 
+/*
+** coding byte for 1,2,3 arguments
+*/
 
-char    *find_cmd_in_string(const char *big, const char *little);
+unsigned char		make_coding_byte3(int a, int b, int c);
+unsigned char		make_coding_byte2(int a, int b);
+unsigned char		make_coding_byte1(int a);
+unsigned char		get_coding_byte(t_line *line);
+
+/*
+** write argument in out_fd
+** arg can be reg, dir, indir
+** dir/indir can be label
+*/
+
+void				write_arg(t_asm *as, const char *s, int index, t_line *ln);
+void				write_indir(t_asm *as, const char *s, t_line *line);
+void				write_dir_l(t_asm *as, const char *s, int inde, t_line *ln);
+void				write_dir(t_asm *as, const char *s, int index);
+void				write_to_byte_code(t_asm *as);
+
+/*
+** get_code return a code of arg
+** get_index return an operation index in g_op_tab
+*/
+
+int					get_code(const char *s);
+int					get_index(const char *line);
+int					get_pos(t_asm *as, const char *s);
+int					calc_size(t_line *line);
+void				make_name(t_asm *as, const char *filename);
+
+/*
+** fill structure with op, lbl, args
+*/
+
+int					fill_label(t_line *l, char *s, int *i, int *start);
+void				fill_op(t_line *l, char *s, int *i, int *start);
+void				fill_args(t_line *line, char *s, int *i, int *start);
+
+char    *find_cmd_in_string(const char *find_in, const char *instr);
 int     parse_lbl(char *line, t_data *data, int line_nbr);
 int     check_lable(char *line, t_data *data, int line_nbr);
 int     confirm_lbl(char *line, t_data *data, int cmd_lbl);
@@ -146,8 +129,8 @@ int     is_lable_char(char lbl);
 char    *ft_copyLable(char *dst, const char *src, size_t len);
 int     parse_cmd(char *line, t_data *data, int line_nbr);
 int     check_cmd_and_args(char *line, t_data *data, int line_nbr);
-int     check_cmd(char *line, t_data *data, int line_nbr, char *instruct_name);
-int     check_args(char *args_cmd, char *ins, int count, t_data *data);
+int     check_cmd(char *line, t_data *data, char *instruct_name);
+int     check_args(char *ins, int count, t_data *data);
 int     confirm_cmd(char *args_cmd, char *cmd_name, t_data *data);
 int     get_type(t_data *data, char *arg);
 void    create_args_array(t_data *data, char *args_cmd, char *cmd_name);
@@ -165,5 +148,31 @@ int     check_name(int  k, char *line, t_data *data, int i);
 int     take_index_by_name(t_data *data, char *name_cmd);
 int     line_is_empty(char *line);
 
-#endif
+static t_op			g_op_tab[17] =
+{
+	{"live", 1, {T_DIR}, 1, 10, "alive", 0, 0},
+	{"ld", 2, {T_DIR | T_IND, T_REG}, 2, 5, "load", 1, 0},
+	{"st", 2, {T_REG, T_IND | T_REG}, 3, 5, "store", 1, 0},
+	{"add", 3, {T_REG, T_REG, T_REG}, 4, 10, "addition", 1, 0},
+	{"sub", 3, {T_REG, T_REG, T_REG}, 5, 10, "substraction", 1, 0},
+	{"and", 3, {T_REG | T_DIR | T_IND, T_REG | T_IND | T_DIR, T_REG}, 6, 6,
+		"et (and  r1, r2, r3   r1&r2 -> r3", 1, 0},
+	{"or", 3, {T_REG | T_IND | T_DIR, T_REG | T_IND | T_DIR, T_REG}, 7, 6,
+		"ou  (or   r1, r2, r3   r1 | r2 -> r3", 1, 0},
+	{"xor", 3, {T_REG | T_IND | T_DIR, T_REG | T_IND | T_DIR, T_REG}, 8, 6,
+		"ou (xor  r1, r2, r3   r1^r2 -> r3", 1, 0},
+	{"zjmp", 1, {T_DIR}, 9, 20, "jump if zero", 0, 1},
+	{"ldi", 3, {T_REG | T_DIR | T_IND, T_DIR | T_REG, T_REG}, 10, 25,
+		"load index", 1, 1},
+	{"sti", 3, {T_REG, T_REG | T_DIR | T_IND, T_DIR | T_REG}, 11, 25,
+		"store index", 1, 1},
+	{"fork", 1, {T_DIR}, 12, 800, "fork", 0, 1},
+	{"lld", 2, {T_DIR | T_IND, T_REG}, 13, 10, "long load", 1, 0},
+	{"lldi", 3, {T_REG | T_DIR | T_IND, T_DIR | T_REG, T_REG}, 14, 50,
+		"long load index", 1, 1},
+	{"lfork", 1, {T_DIR}, 15, 1000, "long fork", 0, 1},
+	{"aff", 1, {T_REG}, 16, 2, "aff", 1, 0},
+	{{0}, 0, {0}, 0, 0, {0}, 0, 0}
+};
 
+#endif
