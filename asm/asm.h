@@ -12,7 +12,7 @@
 #define UNEXPECTED_INPUT "Syntax error - unexpected end of input (Perhaps you forgot to end with a newline ?)\n"
 #define BEGINNING_LABLE_CHAR "LABLE CHAR cant be at the begginig of string, whuzup?\n"
 #define NOT_LABLE_CHAR "{%c} It is not lable char!! WTF MAN\n"
-#define NAME_AND_COMMENT_FIRST "MMMM... We have one little mistake here ... NAME AND COMMENT SHOULD BE FIRST THAN LABALE OR COMMAND, read SUBJECT BEFORE WRITE THIS SHIT AGAIN ;) GL\n"
+#define NAME_AND_COMMENT_FIRST "MMMM... We have one little mistake here ... NAME AND COMMENT SHOULD BE FIRST THAN LABALE OR COMMAND, read SUBJECT BEFORE WRITE THIS SHIT AGAIN\n"
 #define NOT_VALID_ARG_FOR_INSTRUCT "oh my god!!! are you joke?!! THE {%s} is not normal type for instruction %s\n"
 #define TO_FEW_MUCH_ARG "To few/much arguments for {%s} command\n"
 #define ONE_INSTRUCT_PER_LINE "Did you know? There is should be one instruction per line! o_O READ SUBJECT BASTARDO!!!\n"
@@ -84,6 +84,8 @@ typedef struct s_data
 	char    **array;
 	int     no_args;
 	int     no_correct;
+	int     arguments;
+	int     is_empty;
 }              t_data;
 
 typedef struct		header_s
@@ -161,7 +163,7 @@ int     check_byte(int read_byte, char *name);
 int     check_comment(int k, char *line, t_data *data, int i);
 int     check_name(int  k, char *line, t_data *data, int i);
 int     take_index_by_name(t_data *data, char *name_cmd);
-
+int     line_is_empty(char *line);
 
 #endif
 

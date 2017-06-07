@@ -1,4 +1,5 @@
 #include "asm.h"
+#include <ctype.h>
 
 int get_type(t_data *data, char *arg)
 {
@@ -55,7 +56,6 @@ int check_args(char *args_cmd, char *ins, int count, t_data *data)
 	if ((!ft_strcmp(ins, "ld")|| !ft_strcmp(ins, "st") || !ft_strcmp(ins, "lld")) && (count == 1))
 		return (1);
 	data->no_args = 1;
-	printf("\n");
 	return (0);
 }
 
@@ -125,23 +125,41 @@ char		*find_cmd_in_string(const char *big, const char *little)
 int check_cmd_and_args(char *line, t_data *data, int line_nbr)
 {
 	int i;
+	char *instruction;
 
 	i = 0;
+	int flag = 0;
 	while (data->instruct_name[i])
 	{
-		char *instruction = find_cmd_in_string(line, data->instruct_name[i]);
+		instruction = find_cmd_in_string(line, data->instruct_name[i]);
 		if (instruction)
 		{
 			if (!check_cmd(instruction, data, line_nbr, data->instruct_name[i]))
 				return (0);
+			flag = 1;
 		}
 		i++;
 	}
-	return 1;
+	if (!data->lable && !data->cmd)
+		exit(printf("There is no valid line\n"));
+	if (!flag && !data->lable && data->arguments)
+		exit(printf("Find argument for instruction, but didnt see instruction\n"));
+	if (!flag && data->lable && data->arguments)
+		exit(printf("Find argument for instruction2, but didnt see instruction\n"));
+	else
+		return 1;
 }
 
 int parse_cmd(char *line, t_data *data, int line_nbr)
 {
+	printf("cmd line = %s\n", line);
+	int i = 0;
+	while (line[i])
+	{
+		if (line[i] == ',' || line[i] == 'r' || line[i] == '%')
+			data->arguments++;
+		i++;
+	}
 	if (check_cmd_and_args(line, data, line_nbr))
 	{
 		if (data->cmd && !data->name && !data->comment)

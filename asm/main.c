@@ -1,11 +1,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "asm.h"
+#include <ctype.h>
 
 int g_num_line = 0;
 int g_start_mem_arr_size = 5;
 int g_new_mem_arr_size = 1;
 int g_i = 0;
+
+int    line_is_empty(char *line)
+{
+	int len = (int)ft_strlen(line);
+
+	if (len <= 1)
+		return (1);
+	else
+		return (0);
+
+}
 
 int   parse_file(t_data *data)
 {
@@ -14,7 +26,7 @@ int   parse_file(t_data *data)
 	i = 0;
 	while (data->array[i])
 	{
-		if ((data->array[i][0] == COMMENT_CHAR) || (!ft_strcmp("", data->array[i])))
+		if ((data->array[i][0] == COMMENT_CHAR) || (!ft_strcmp("", data->array[i])) || line_is_empty(data->array[i]))
 		{
 			i++;
 			continue;
@@ -37,6 +49,7 @@ int   parse_file(t_data *data)
 			return 0;
 		if (!parse_cmd(data->array[i], data, i))
 			return (0);
+		data->lable = 0;
 		i++;
 	}
 	return 1;
