@@ -41,11 +41,11 @@ extern int g_i;
 typedef struct s_data
 {
 	int     lable;
-	char    *cmd_lbl_name;
+	char    cmd_lbl_name[30];
 	char    *instruct_name[17];
 	int     index;
 	int     cmd;
-	char    **array_args;
+	char    array_args[7][30];
 	int     name;
 	int     comment;
 	char    **array;

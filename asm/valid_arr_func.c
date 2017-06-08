@@ -58,7 +58,7 @@ int    copy_file_to_array(t_data *data, int fd)
 	{
 		g_num_line++;
 		copy_file(line, data);
-		//free(line);
+		free(line);
 	}
 	if ((!ft_strcmp("\t", data->array[g_num_line - 1]) || !ft_strcmp("", data->array[g_num_line - 1])))
 	{
@@ -71,7 +71,7 @@ int    copy_file_to_array(t_data *data, int fd)
 }
 
 
-void    create_args_array(t_data *data, char *args_cmd, char *cmd_name)
+/*void    create_args_array(t_data *data, char *args_cmd, char *cmd_name)
 {
 	int i;
 
@@ -95,4 +95,4 @@ void    create_args_array(t_data *data, char *args_cmd, char *cmd_name)
 		count = 0;
 	}
 }
-
+*/

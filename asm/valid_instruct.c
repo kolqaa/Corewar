@@ -33,7 +33,7 @@ int get_type(t_data *data, char *arg)
 int confirm_cmd(char *args_cmd, char *cmd_name, t_data *data)
 {
 	data->index = take_index_by_name(data, cmd_name);
-	create_args_array(data, args_cmd, cmd_name);
+	//create_args_array(data, args_cmd, cmd_name);
 	copy_args_to_array(data, args_cmd);
 	int i = -1;
 	while (++i < g_op_tab[data->index].args_nbr)

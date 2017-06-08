@@ -100,18 +100,18 @@ int main(int argc, char **argv)
 	ft_memset(data, 0, sizeof(*data));
 	init_mas(data);
 	data->arguments = 0;
-	//if (argc != 2)
-	//{
-	//	printf("Usage: <sourcefile.s> other extension not supported\n");
-	//	return (0);
-	//}
-	char *file = "../corewar/champs/toto.s";
-	if ((fd = open(file, O_RDONLY)) == -1)
+	if (argc != 2)
 	{
-		printf("Cannot read \"{%s}\" file", file);
+		printf("Usage: <sourcefile.s> other extension not supported\n");
+		return (0);
+	}
+	//char *file = "../corewar/champs/ex.s";
+	if ((fd = open(argv[1], O_RDONLY)) == -1)
+	{
+		printf("Cannot read \"{%s}\" file", argv[1]);
 		return 0;
 	}
-	if (!validate(fd, data, file))
+	if (!validate(fd, data, argv[1]))
 		return (0);
 	printf("CHETKIY IGROK EBA EDEM DALSHE\n");
 	return (0);
