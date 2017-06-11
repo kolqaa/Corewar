@@ -1,6 +1,5 @@
 #include "asm.h"
 
-
 void copy_args_to_array(t_data *data, char *args_cmd)
 {
 	int i;
@@ -43,26 +42,59 @@ void copy_file(char *line, t_data *data)
 	}
 	data->array[g_i] = (char *)malloc(sizeof(char *) * ft_strlen(line) + 1);
 	j = 0;
+	if (line[0] == COMMENT_CHAR)
+		return;
 	while (line[index])
+	{
+		if ((line[index] == COMMENT_CHAR && data->flag_for_name && data->flag_for_com) || (line[index] == ';'))
+			break ;
+		if (!data->flag_for_name && !data->flag_for_com)
+			find_name_cmm(line, data);
 		data->array[g_i][j++] = line[index++];
-	data->array[g_i][j] = '\0';
-	g_i++;
+	}
+	data->array[g_i++][j] = '\0';
 }
 
+int count_line(t_data *data)
+{
+	int i;
+
+	i = 0;
+	while (data->array[i])
+		i++;
+	return (i);
+}
+
+void    find_name_cmm(char *line, t_data *data)
+{
+	int i;
+
+	i = 0;
+	while (line[i] == ' ' || line[i] == '\t')
+		i++;
+	if (!ft_strncmp(&line[i], ".name", 4))
+		data->flag_for_name = 1;
+	else if (!ft_strncmp(&line[i], ".comment", 7))
+		data->flag_for_com = 1;
+
+}
 
 int    copy_file_to_array(t_data *data, int fd)
 {
 	char *line;
+	int len;
 
+	len = 0;
 	while (get_next_line(fd, &line))
 	{
 		g_num_line++;
 		copy_file(line, data);
 		free(line);
 	}
-	if ((!ft_strcmp("\t", data->array[g_num_line - 1]) || !ft_strcmp("", data->array[g_num_line - 1])))
+	data->array[g_i] = 0;
+	len = count_line(data);
+	if ((!ft_strcmp("\t", data->array[len - 1]) || !ft_strcmp("", data->array[len - 1]) || !ft_strcmp("\n", data->array[len - 1])))
 	{
-		data->array[g_i - 1] = 0;
 		g_i = 0;
 		return (1);
 	}

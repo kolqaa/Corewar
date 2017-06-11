@@ -40,6 +40,9 @@ extern int g_i;
 
 typedef struct s_data
 {
+	int     flag_for_name;
+	int     flag_for_com;
+	int     flag_for_lable;
 	int     lable;
 	char    cmd_lbl_name[30];
 	char    *instruct_name[17];
@@ -52,6 +55,8 @@ typedef struct s_data
 	int     no_args;
 	int     no_correct;
 	int     arguments;
+	int     find_cmd;
+	char    cmp[255];
 }              t_data;
 
 typedef struct		s_line
@@ -120,7 +125,7 @@ int					fill_label(t_line *l, char *s, int *i, int *start);
 void				fill_op(t_line *l, char *s, int *i, int *start);
 void				fill_args(t_line *line, char *s, int *i, int *start);
 
-char    *find_cmd_in_string(const char *find_in, const char *instr);
+char    *find_cmd_in_string(char *find_in, char *instr);
 int     parse_lbl(char *line, t_data *data, int line_nbr);
 int     check_lable(char *line, t_data *data, int line_nbr);
 int     confirm_lbl(char *line, t_data *data, int cmd_lbl);
@@ -147,6 +152,7 @@ int     check_comment(int k, char *line, t_data *data, int i);
 int     check_name(int  k, char *line, t_data *data, int i);
 int     take_index_by_name(t_data *data, char *name_cmd);
 int     line_is_empty(char *line);
+void    find_name_cmm(char *line, t_data *data);
 
 static t_op			g_op_tab[17] =
 {

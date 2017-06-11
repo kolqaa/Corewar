@@ -18,6 +18,9 @@ char		*ft_copyLable(char *dst, const char *src, size_t len)
 
 int parse_lbl(char *line, t_data *data, int line_nbr)
 {
+
+	if (!data->name || !data->comment)
+		exit(printf(NAME_AND_COMMENT_FIRST));
 	if (check_lable(line, data, line_nbr))
 	{
 		if (data->lable && !data->name && !data->comment)
