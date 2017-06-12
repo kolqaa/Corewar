@@ -48,21 +48,11 @@ void copy_file(char *line, t_data *data)
 	{
 		if ((line[index] == COMMENT_CHAR && data->flag_for_name && data->flag_for_com) || (line[index] == ';'))
 			break ;
-		if (!data->flag_for_name && !data->flag_for_com)
+		if (!data->flag_for_name || !data->flag_for_com)
 			find_name_cmm(line, data);
 		data->array[g_i][j++] = line[index++];
 	}
 	data->array[g_i++][j] = '\0';
-}
-
-int count_line(t_data *data)
-{
-	int i;
-
-	i = 0;
-	while (data->array[i])
-		i++;
-	return (i);
 }
 
 void    find_name_cmm(char *line, t_data *data)
@@ -74,9 +64,8 @@ void    find_name_cmm(char *line, t_data *data)
 		i++;
 	if (!ft_strncmp(&line[i], ".name", 4))
 		data->flag_for_name = 1;
-	else if (!ft_strncmp(&line[i], ".comment", 7))
+	if (!ft_strncmp(&line[i], ".comment", 7))
 		data->flag_for_com = 1;
-
 }
 
 int    copy_file_to_array(t_data *data, int fd)

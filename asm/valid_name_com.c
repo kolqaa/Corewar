@@ -20,7 +20,6 @@ int check_byte(int read_byte, char *name)
 
 int check_comment(int k, char *line, t_data *data, int i)
 {
-	printf("comm valid %s\n", line);
 	static int quotes = 0;
 	static int read_byte = 0;
 
@@ -46,7 +45,6 @@ int check_comment(int k, char *line, t_data *data, int i)
 
 int check_name(int k, char *line, t_data *data, int i)
 {
-	printf("name valid %s\n", line);
 	static int quotes = 0;
 	static int read_byte = 0;
 

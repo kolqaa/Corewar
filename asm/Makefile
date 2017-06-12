@@ -7,7 +7,8 @@ SRC = main.c \
 	valid_instruct.c \
 	valid_instruct2.c \
 	valid_lable.c \
-	valid_name_com.c
+	valid_name_com.c \
+	valid_add_ins_func.c
 
 all:
 	@echo Compiling...

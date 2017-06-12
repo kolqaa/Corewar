@@ -1,74 +1,6 @@
 #include "asm.h"
 #include <ctype.h>
 
-int    check_r(char *str)
-{
-	int i;
-
-	i = 0;
-	while (str[i] == ' ' || str[i] == '\t')
-		i++;
-	while (str[i] != 'r')
-		i++;
-	i++;
-	while (str[i])
-	{
-		if(ft_isdigit(str[i]) || str[i] == ' ' || str[i] == '\t')
-			i++;
-		else
-			exit(printf("{%s} 1 is not normal arguments for instruction\n", str));
-	}
-	return (1);
-}
-
-int     check_proc(char *str)
-{
-	int i;
-
-	i = 0;
-	while (str[i] == ' ' || str[i] == '\t')
-		i++;
-	while (str[i] != '%')
-		i++;
-	i++;
-	if (str[i] == '-')
-		i++;
-	if (str[i] == ':')
-	{
-		while (str[i])
-			i++;
-		return (1);
-	}
-	while (str[i])
-	{
-		if (ft_isdigit(str[i]) || str[i] == ' ' || str[i] == '\t')
-			i++;
-		else if (str[i] == COMMENT_CHAR)
-			break;
-		else
-			exit(printf("{%s} 3 is not normal arguments for instruction\n", str));
-	}
-	return (1);
-
-}
-
-int check_digit(char *str)
-{
-	int i;
-
-	i = 0;
-	while (str[i] == ' ' || str[i] == '\t' || str[i] == '-')
-		i++;
-	while (str[i])
-	{
-		if (ft_isdigit(str[i]))
-			i++;
-		else
-			exit(printf("{%s} 2 is not normal arguments for instruction\n", str));
-	}
-	return (1);
-}
-
 int get_type(t_data *data, char *arg)
 {
 	int i;
@@ -78,18 +10,18 @@ int get_type(t_data *data, char *arg)
 	{
 		if (arg[i] == 'r' && check_r(arg) && ft_isdigit(arg[i + 1]) && ft_atoi(&arg[i + 1]) <= 99)
 			return (T_REG);
-		else if (arg[i] == '%' && check_proc(arg))
+		else if (arg[i] == DIRECT_CHAR && check_proc(arg))
 		{
 			if (arg[i + 1] == '-')
 				i++;
-			if ((arg[i + 1] == ':') || ft_isdigit(arg[i + 1]))
+			if ((arg[i + 1] == LABEL_CHAR) || ft_isdigit(arg[i + 1]))
 				return (T_DIR);
 			else
 				return (0);
 		}
 		else if (arg[i] >= '0' && arg[i] <= '9' && check_digit(arg))
 			return (T_IND);
-		else if (arg[i] == ':')
+		else if (arg[i] == LABEL_CHAR)
 			return (T_IND);
 		i++;
 	}
@@ -146,7 +78,7 @@ int   check_cmd(char *line, t_data *data, char *instruct_name)
 	int k = i;
 	while (line[i])
 	{
-		if (line[i] == ',')
+		if (line[i] == SEPARATOR_CHAR)
 			count++;
 		i++;
 	}
@@ -179,7 +111,9 @@ char		*find_cmd_in_string(char *find_in, char *instr)
 					(!ft_strcmp(instr, "st") && str[i + 2] != '\t'  && str[i + 2] != ' ' && str[i + 1] != '\0') ||
 					(!ft_strcmp(instr, "or") && str[i + 2] != ' ' && str[i + 2] != '\t' && str[i + 1] != '\0') ||
 					(!ft_strcmp(instr, "live") && str[i - 1] != ' ' && str[i - 1] != '\t' && str[i - 1]) ||
+					(!ft_strcmp(instr, "live") && str[i + 4] != ' ' && str[i + 4] != '\t' && str[i + 4]) ||
 					(!ft_strcmp(instr, "ld") && str[i + 2] != ' ' && str[i + 2] != '\t') ||
+					(!ft_strcmp(instr, "fork") && str[i + 4] != ' ' && str[i + 4] != '\t' && str[i + 4]) ||
 					(!ft_strcmp(instr, "sti") && str[i + 3] != '\t' && str[i + 3] != ' ' && str[i + 3] != '\0'))
 			{
 				i++;
