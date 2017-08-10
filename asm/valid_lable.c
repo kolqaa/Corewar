@@ -32,7 +32,7 @@ int confirm_lbl(char *line, t_data * data, int cmd_lbl)
 
 		}
 		data->lable = 1;
-		data->cmd_lbl_name = ft_copyLable(data->cmd_lbl_name, line, (size_t) i);
+		/*data->cmd_lbl_name*/  ft_copyLable(data->cmd_lbl_name, line, (size_t) i);
 		return (1);
 	}
 	if(!help_confirm_lable(line, data, cmd_lbl))
@@ -91,6 +91,7 @@ int check_lable(char *line, t_data *data, int line_nbr)
 				return (0);
 			if (!exist_lable(data->cmd_lbl_name, data, line_nbr))
 				return (0);
+			//free(data->cmd_lbl_name);
 		}
 		if (line[i] == LABEL_CHAR && is_lable_char(line[i - 1]))
 		{

@@ -1,6 +1,74 @@
 #include "asm.h"
 #include <ctype.h>
 
+int    check_r(char *str)
+{
+	int i;
+
+	i = 0;
+	while (str[i] == ' ' || str[i] == '\t')
+		i++;
+	while (str[i] != 'r')
+		i++;
+	i++;
+	while (str[i])
+	{
+		if(ft_isdigit(str[i]) || str[i] == ' ' || str[i] == '\t')
+			i++;
+		else
+			exit(printf("{%s} 1 is not normal arguments for instruction\n", str));
+	}
+	return (1);
+}
+
+int     check_proc(char *str)
+{
+	int i;
+
+	i = 0;
+	while (str[i] == ' ' || str[i] == '\t')
+		i++;
+	while (str[i] != '%')
+		i++;
+	i++;
+	if (str[i] == '-')
+		i++;
+	if (str[i] == ':')
+	{
+		while (str[i])
+			i++;
+		return (1);
+	}
+	while (str[i])
+	{
+		if (ft_isdigit(str[i]) || str[i] == ' ' || str[i] == '\t')
+			i++;
+		else if (str[i] == COMMENT_CHAR)
+			break;
+		else
+			exit(printf("{%s} 3 is not normal arguments for instruction\n", str));
+	}
+	return (1);
+
+}
+
+int check_digit(char *str)
+{
+	int i;
+
+	i = 0;
+	while (str[i] == ' ' || str[i] == '\t' || str[i] == '-')
+		i++;
+	while (str[i])
+	{
+		if (ft_isdigit(str[i]))
+			i++;
+		else
+			exit(printf("{%s} 2 is not normal arguments for instruction\n", str));
+	}
+	return (1);
+}
+
 int get_type(t_data *data, char *arg)
 {
 	int i;
@@ -8,9 +76,9 @@ int get_type(t_data *data, char *arg)
 	i = 0;
 	while (arg[i])
 	{
-		if (arg[i] == 'r' && ft_isdigit(arg[i + 1]) && ft_atoi(&arg[i + 1]) <= 99)
+		if (arg[i] == 'r' && check_r(arg) && ft_isdigit(arg[i + 1]) && ft_atoi(&arg[i + 1]) <= 99)
 			return (T_REG);
-		else if (arg[i] == '%')
+		else if (arg[i] == '%' && check_proc(arg))
 		{
 			if (arg[i + 1] == '-')
 				i++;
@@ -19,12 +87,11 @@ int get_type(t_data *data, char *arg)
 			else
 				return (0);
 		}
-		else if (arg[i] >= '0' && arg[i] <= '9')
+		else if (arg[i] >= '0' && arg[i] <= '9' && check_digit(arg))
 			return (T_IND);
 		else if (arg[i] == ':')
 			return (T_IND);
 		i++;
-
 	}
 	return  (0);
 
@@ -33,7 +100,7 @@ int get_type(t_data *data, char *arg)
 int confirm_cmd(char *args_cmd, char *cmd_name, t_data *data)
 {
 	data->index = take_index_by_name(data, cmd_name);
-	create_args_array(data, args_cmd, cmd_name);
+	//create_args_array(data, args_cmd, cmd_name);
 	copy_args_to_array(data, args_cmd);
 	int i = -1;
 	while (++i < g_op_tab[data->index].args_nbr)
@@ -93,12 +160,12 @@ int   check_cmd(char *line, t_data *data, char *instruct_name)
 	return 1;
 }
 
-char		*find_cmd_in_string(const char *find_in, const char *instr)
+char		*find_cmd_in_string(char *find_in, char *instr)
 {
 	int		i;
 	char	*str;
 
-	str = (char *)find_in;
+	str = find_in;
 	i = 0;
 	if (*instr == '\0')
 		return (str);
@@ -112,7 +179,8 @@ char		*find_cmd_in_string(const char *find_in, const char *instr)
 					(!ft_strcmp(instr, "st") && str[i + 2] != '\t'  && str[i + 2] != ' ' && str[i + 1] != '\0') ||
 					(!ft_strcmp(instr, "or") && str[i + 2] != ' ' && str[i + 2] != '\t' && str[i + 1] != '\0') ||
 					(!ft_strcmp(instr, "live") && str[i - 1] != ' ' && str[i - 1] != '\t' && str[i - 1]) ||
-					(!ft_strcmp(instr, "ld") && str[i + 2] != ' ' && str[i + 2] != '\t'))
+					(!ft_strcmp(instr, "ld") && str[i + 2] != ' ' && str[i + 2] != '\t') ||
+					(!ft_strcmp(instr, "sti") && str[i + 3] != '\t' && str[i + 3] != ' ' && str[i + 3] != '\0'))
 			{
 				i++;
 				continue;

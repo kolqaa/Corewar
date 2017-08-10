@@ -11,14 +11,50 @@ int g_i = 0;
 int    line_is_empty(char *line)
 {
 	int len = (int)ft_strlen(line);
-
-	if (len <= 1)
+	int i = 0;
+	int count = 0;
+	while (line[i])
+	{
+		if (line[i] == ' ' || line[i] == '\t')
+			count++;
+		else
+			count--;
+		i++;
+	}
+	if (count == len)
 		return (1);
 	else
 		return (0);
 
 }
 
+int check_other(t_data *data, int i)
+{
+	if (!parse_lbl(data->array[i], data, i))
+		return 0;
+	if (!parse_cmd(data->array[i], data, i))
+		return (0);
+	return (1);
+}
+
+int check_name_comm(t_data *data, int i)
+{
+	int j = 0;
+	while (data->array[i][j] == ' ' || data->array[i][j] == '\t')
+		j++;
+	if (!ft_strncmp(&data->array[i][j], NAME_CMD_STRING, 4))
+	{
+		check_name(i, &data->array[i][j], data, -1);
+		return (1);
+	}
+	if (!ft_strncmp(&data->array[i][j], COMMENT_CMD_STRING, 7))
+	{
+		check_comment(i, &data->array[i][j], data, -1);
+		return (1);
+	}
+	return (0);
+
+}
 int   parse_file(t_data *data)
 {
 	int i;
@@ -26,28 +62,18 @@ int   parse_file(t_data *data)
 	i = 0;
 	while (data->array[i])
 	{
-		if ((data->array[i][0] == COMMENT_CHAR) || (!ft_strcmp("", data->array[i])) || line_is_empty(data->array[i]))
+		printf("eror %s\n", data->array[i]);
+		if (!ft_strcmp(data->array[i], "") || !ft_strcmp(data->array[i], "\t") || line_is_empty(data->array[i]))
+		{
+			i++;
+			continue ;
+		}
+		if (check_name_comm(data, i))
 		{
 			i++;
 			continue;
 		}
-		if (ft_strstr(data->array[i], NAME_CMD_STRING))
-		{
-			if (!check_name(i, data->array[i], data, -1))
-				return 0;
-			i++;
-			continue;
-		}
-		if (ft_strstr(data->array[i], COMMENT_CMD_STRING))
-		{
-			if (!check_comment(i, data->array[i], data, -1))
-				return 0;
-			i++;
-			continue;
-		}
-		if (!parse_lbl(data->array[i], data, i))
-			return 0;
-		if (!parse_cmd(data->array[i], data, i))
+		if (!check_other(data, i))
 			return (0);
 		data->lable = 0;
 		i++;
@@ -100,18 +126,18 @@ int main(int argc, char **argv)
 	ft_memset(data, 0, sizeof(*data));
 	init_mas(data);
 	data->arguments = 0;
-	//if (argc != 2)
-	//{
-	//	printf("Usage: <sourcefile.s> other extension not supported\n");
-	//	return (0);
-	//}
-	char *file = "../corewar/champs/toto.s";
-	if ((fd = open(file, O_RDONLY)) == -1)
+	if (argc != 2)
 	{
-		printf("Cannot read \"{%s}\" file", file);
+		printf("Usage: <sourcefile.s> other extension not supported\n");
+		return (0);
+	}
+	//char *file = "../corewar/champs/ex.s";
+	if ((fd = open(argv[1], O_RDONLY)) == -1)
+	{
+		printf("Cannot read \"{%s}\" file", argv[1]);
 		return 0;
 	}
-	if (!validate(fd, data, file))
+	if (!validate(fd, data, argv[1]))
 		return (0);
 	printf("CHETKIY IGROK EBA EDEM DALSHE\n");
 	return (0);

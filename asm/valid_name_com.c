@@ -20,6 +20,7 @@ int check_byte(int read_byte, char *name)
 
 int check_comment(int k, char *line, t_data *data, int i)
 {
+	printf("comm valid %s\n", line);
 	static int quotes = 0;
 	static int read_byte = 0;
 
@@ -29,13 +30,10 @@ int check_comment(int k, char *line, t_data *data, int i)
 			quotes++;
 		read_byte++;
 		if (quotes > 2)
-		{
-			printf(LEXICAL_ERROR, k, i);
-			return (0);
-		}
+			exit(printf("Error in name to much {\"} \n"));
 	}
 	if (!check_byte(read_byte, COMMENT_CMD_STRING))
-		return (0);
+		exit (0);
 	if (quotes == 2)
 	{
 		data->comment = 1;
@@ -48,6 +46,7 @@ int check_comment(int k, char *line, t_data *data, int i)
 
 int check_name(int k, char *line, t_data *data, int i)
 {
+	printf("name valid %s\n", line);
 	static int quotes = 0;
 	static int read_byte = 0;
 
@@ -57,13 +56,10 @@ int check_name(int k, char *line, t_data *data, int i)
 			quotes++;
 		read_byte++;
 		if (quotes > 2)
-		{
-			printf(LEXICAL_ERROR, k, i);
-			return (0);
-		}
+			exit(printf("Error in name to much {\"}\n"));
 	}
 	if (!check_byte(read_byte, NAME_CMD_STRING))
-		return (0);
+		exit (0);
 	if (quotes == 2)
 	{
 		data->name = 1;
