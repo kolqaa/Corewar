@@ -1,0 +1,9 @@
+#import <Foundation/Foundation.h>
+
+int	main(int argc, char *argv[])
+{ 
+  @autoreleasepool {
+    NSLog (@"Proggraming is fun!");
+  }
+  return (0);
+}

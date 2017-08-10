@@ -1,5 +1,15 @@
 #include "asm.h"
 
+int count_line(t_data *data)
+{
+	int i;
+
+	i = 0;
+	while (data->array[i])
+		i++;
+	return (i);
+}
+
 int   check_prog_name(char *prog_name)
 {
 	int len;
@@ -28,6 +38,8 @@ int check_again(t_data *data)
 		printf("It cant be null file after name and comment\n");
 		return (0);
 	}
+	if (!data->lable && !data->cmd && !data->name && !data->comment)
+		exit(printf("Empty file\n"));
 	return (1);
 }
 

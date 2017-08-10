@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "asm.h"
-#include <ctype.h>
 
 int g_num_line = 0;
 int g_start_mem_arr_size = 5;
@@ -62,7 +61,6 @@ int   parse_file(t_data *data)
 	i = 0;
 	while (data->array[i])
 	{
-		printf("eror %s\n", data->array[i]);
 		if (!ft_strcmp(data->array[i], "") || !ft_strcmp(data->array[i], "\t") || line_is_empty(data->array[i]))
 		{
 			i++;

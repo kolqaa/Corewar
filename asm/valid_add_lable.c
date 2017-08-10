@@ -5,13 +5,12 @@ char		*ft_copyLable(char *dst, const char *src, size_t len)
 	size_t i;
 
 	i = 0;
-	//dst = (char *) malloc(sizeof(char) * (len + 2));
 	while (i < len && src[i] != '\0')
 	{
 		dst[i] = src[i];
 		i++;
 	}
-	dst[i] = ':';
+	dst[i] = LABEL_CHAR;
 	dst[i + 1] = '\0';
 	return (dst);
 }

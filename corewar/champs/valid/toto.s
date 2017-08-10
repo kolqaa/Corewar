@@ -73,6 +73,4 @@ level100:	live %42
 		ld   %-194,r14			# $A -6 -0
 		ld   %0,r2			#
 		zjmp %:label			#
-
-
-
+	

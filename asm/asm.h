@@ -21,7 +21,6 @@
 
 #define NAME_ERROR "Champion name to long (Max length 128 bytes)\n"
 #define COMMENT_ERROR "Champion comment too long (Max length 2048)\n"
-#define LEXICAL_ERROR "Lexical error at [%d : %d]\n"
 #define PROG_NAME_ERROR "Usage: <sourcefile.s> other extension not supported\n"
 #define UNEXPECTED_INPUT "Syntax error - unexpected end of input (Perhaps you forgot to end with a newline ?)\n"
 #define BEGINNING_LABLE_CHAR "LABLE CHAR cant be at the begginig of string, whuzup?\n"
@@ -30,6 +29,9 @@
 #define NOT_VALID_ARG_FOR_INSTRUCT "THE {%s} is not normal type for instruction %s\n"
 #define TO_FEW_MUCH_ARG "To few/much arguments for {%s} command\n"
 #define ONE_INSTRUCT_PER_LINE "Did you know? There is should be one instruction per line! o_O READ SUBJECT BASTARDO!!!\n"
+#define ARG_WITHOUT_INS "Error at line {%s} there is arguments without instruction\n"
+#define INS_WITHOUT_ARG "In line {%s} instruction without/or incorrect arguments\n"
+#define NOT_VALID_LINE "This one {%s} not valid line, this is not instruction/lable/argument, looks more like bullshit\n"
 #define COMMAND_LABLE 1
 #define FIRST_LABLE 0
 
@@ -44,11 +46,11 @@ typedef struct s_data
 	int     flag_for_com;
 	int     flag_for_lable;
 	int     lable;
-	char    cmd_lbl_name[30];
-	char    *instruct_name[17];
+	char    cmd_lbl_name[255];
+	char    *instruct_name[255];
 	int     index;
 	int     cmd;
-	char    array_args[7][30];
+	char    array_args[10][255];
 	int     name;
 	int     comment;
 	char    **array;
@@ -125,33 +127,58 @@ int					fill_label(t_line *l, char *s, int *i, int *start);
 void				fill_op(t_line *l, char *s, int *i, int *start);
 void				fill_args(t_line *line, char *s, int *i, int *start);
 
+/*
+ ** validation func for instruction and argumenst
+ */
+
+int     cmd_exist(char *str);
+int     start_argument(t_data *data, char *arg);
 char    *find_cmd_in_string(char *find_in, char *instr);
+int     parse_cmd(char *line, t_data *data, int line_nbr);
+int     check_cmd_and_args(char *line, t_data *data, int line_nbr);
+int     check_cmd(char *line, t_data *data, char *instruct_name);
+int     check_args(char *ins, int count, t_data *data);
+int     take_index_by_name(t_data *data, char *name_cmd);
+int     confirm_cmd(char *args_cmd, char *cmd_name, t_data *data);
+int     get_type(t_data *data, char *arg);
+int     check_r(char *str);
+int     check_proc(char *str);
+int     check_digit(char *str);
+int     ft_wordequ(char *string_to_find, char *ins[], char *word);
+int     take_index_by_name(t_data *data, char *name_cmd);
+
+
+/*
+ ** validation function for lable
+ */
+
 int     parse_lbl(char *line, t_data *data, int line_nbr);
 int     check_lable(char *line, t_data *data, int line_nbr);
 int     confirm_lbl(char *line, t_data *data, int cmd_lbl);
 int     exist_lable(char *lable_name, t_data *data, int line_nbr);
 int     is_lable_char(char lbl);
 char    *ft_copyLable(char *dst, const char *src, size_t len);
-int     parse_cmd(char *line, t_data *data, int line_nbr);
-int     check_cmd_and_args(char *line, t_data *data, int line_nbr);
-int     check_cmd(char *line, t_data *data, char *instruct_name);
-int     check_args(char *ins, int count, t_data *data);
-int     confirm_cmd(char *args_cmd, char *cmd_name, t_data *data);
-int     get_type(t_data *data, char *arg);
+
+/*
+ ** function for creating validation array and copy function
+ */
 void    create_args_array(t_data *data, char *args_cmd, char *cmd_name);
 void    copy_args_to_array(t_data *data, char *args_cmd);
 int     copy_file_to_array(t_data *data, int fd);
 void    make_array(t_data *data);
 void    copy_file(char *line, t_data *data);
-int     ft_wordequ(char *string_to_find, char *ins[], char *word);
-int     take_index_by_name(t_data *data, char *name_cmd);
+int     line_is_empty(char *line);
+int     count_line(t_data *data);
+
+/*
+ ** validation function for program and player comment and name
+ */
+
 int     check_prog_name(char *prog_name);
 int     check_again(t_data *data);
 int     check_byte(int read_byte, char *name);
 int     check_comment(int k, char *line, t_data *data, int i);
 int     check_name(int  k, char *line, t_data *data, int i);
-int     take_index_by_name(t_data *data, char *name_cmd);
-int     line_is_empty(char *line);
 void    find_name_cmm(char *line, t_data *data);
 
 static t_op			g_op_tab[17] =
